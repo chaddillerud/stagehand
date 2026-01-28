@@ -739,7 +739,7 @@ export default function Teleprompter() {
                 <input
                   type="range"
                   min="0.5"
-                  max="2.0"
+                  max="3.0"
                   step="0.1"
                   value={scrollSpeed}
                   onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
@@ -748,12 +748,13 @@ export default function Teleprompter() {
                 />
                 <div className="flex justify-between text-xs text-zinc-600 mt-1">
                   <span>50%</span>
-                  <span>100%</span>
-                  <span>200%</span>
+                  <span>150%</span>
+                  <span>300%</span>
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">
+                  💡 Default: 150% - Adjust based on song tempo
                   {!songs[currentIndex]?.duration && (
-                    <div className="text-yellow-500">⚠ Current song has no duration set</div>
+                    <div className="text-yellow-500 mt-1">⚠ Current song has no duration set</div>
                   )}
                 </div>
               </div>
