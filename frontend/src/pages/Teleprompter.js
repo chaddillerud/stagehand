@@ -32,7 +32,7 @@ export default function Teleprompter() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true); // Default ON
   const [scrollSpeed, setScrollSpeed] = useState(1.0); // 1.0 = 100%, range 0.5 to 2.0
   const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
@@ -153,10 +153,13 @@ export default function Teleprompter() {
 
   // Auto-scroll effect
   useEffect(() => {
-    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current) return;
+    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) return;
 
     const currentSong = songs[currentIndex];
-    if (!currentSong || !currentSong.duration) return;
+    if (!currentSong || !currentSong.duration) {
+      console.log('Auto-scroll: No duration set for current song');
+      return;
+    }
 
     // Parse duration (MM:SS format)
     const parseDuration = (durationStr) => {
@@ -168,13 +171,21 @@ export default function Teleprompter() {
     };
 
     const songDurationSeconds = parseDuration(currentSong.duration);
-    if (songDurationSeconds === 0) return;
+    if (songDurationSeconds === 0) {
+      console.log('Auto-scroll: Invalid duration format');
+      return;
+    }
 
     // Calculate scroll parameters
     const container = lyricsRef.current;
     const totalScrollHeight = container.scrollHeight - container.clientHeight;
     
-    if (totalScrollHeight <= 0) return;
+    if (totalScrollHeight <= 0) {
+      console.log('Auto-scroll: No scrollable content');
+      return;
+    }
+
+    console.log(`Auto-scroll active: ${totalScrollHeight}px over ${songDurationSeconds}s at ${scrollSpeed}x speed`);
 
     // Pixels per second adjusted by speed multiplier
     const pixelsPerSecond = (totalScrollHeight / songDurationSeconds) * scrollSpeed;
@@ -186,6 +197,8 @@ export default function Teleprompter() {
     const scrollInterval = setInterval(() => {
       if (container.scrollTop < totalScrollHeight) {
         container.scrollTop += pixelsPerFrame;
+      } else {
+        console.log('Auto-scroll: Reached end of lyrics');
       }
     }, 1000 / frameRate);
 
