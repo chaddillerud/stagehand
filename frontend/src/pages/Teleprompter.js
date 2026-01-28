@@ -12,7 +12,9 @@ import {
   GripVertical,
   Settings,
   Bluetooth,
-  X
+  X,
+  Monitor,
+  Smartphone
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -29,6 +31,7 @@ export default function Teleprompter() {
   const [showControls, setShowControls] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
+  const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
   const timerRef = useRef(null);
@@ -331,6 +334,31 @@ export default function Teleprompter() {
 
   const styles = getDisplayModeStyles();
 
+  const getOrientationStyles = () => {
+    if (orientation === 'portrait') {
+      return {
+        container: 'flex-col',
+        header: 'flex-col gap-4 text-center',
+        lyrics: 'text-3xl md:text-5xl lg:text-7xl',
+        songTitle: 'text-5xl md:text-7xl',
+        controls: 'flex-col gap-3',
+        songNav: 'flex-col max-h-48 overflow-y-auto',
+        mainControls: 'grid grid-cols-2 gap-3 w-full'
+      };
+    }
+    return {
+      container: 'flex-col',
+      header: 'flex-row justify-between gap-8',
+      lyrics: 'text-3xl md:text-4xl lg:text-6xl',
+      songTitle: 'text-4xl md:text-6xl lg:text-8xl',
+      controls: 'flex-col',
+      songNav: 'flex-row overflow-x-auto',
+      mainControls: 'flex gap-4'
+    };
+  };
+
+  const orientStyles = getOrientationStyles();
+
   if (!setlist || songs.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black text-white">
@@ -355,7 +383,7 @@ export default function Teleprompter() {
           showControls ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className="flex items-center justify-between gap-8">
+        <div className={`flex items-center ${orientStyles.header}`}>
           <div>
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Set List
@@ -405,15 +433,15 @@ export default function Teleprompter() {
         <div className="max-w-4xl mx-auto">
           {/* Current Song Info */}
           <div className="mb-8">
-            <h1 className={`text-4xl md:text-6xl lg:text-8xl font-mono font-bold leading-tight mb-4 ${styles.text}`}>
+            <h1 className={`${orientStyles.songTitle} font-mono font-bold leading-tight mb-4 ${styles.text}`}>
               {currentSong.name}
             </h1>
             {currentSong.artist && (
-              <div className={`text-2xl md:text-3xl ${styles.secondaryText} mb-4`}>
+              <div className={`${orientation === 'portrait' ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'} ${styles.secondaryText} mb-4`}>
                 {currentSong.artist}
               </div>
             )}
-            <div className={`flex gap-4 text-sm font-mono ${styles.secondaryText}`}>
+            <div className={`flex ${orientation === 'portrait' ? 'flex-col gap-2' : 'gap-4'} text-sm font-mono ${styles.secondaryText}`}>
               <span data-testid="song-position">
                 Song {currentIndex + 1} of {songs.length}
               </span>
@@ -424,7 +452,7 @@ export default function Teleprompter() {
           </div>
 
           {/* Lyrics */}
-          <div className={`text-3xl md:text-4xl lg:text-6xl font-mono font-bold leading-snug whitespace-pre-wrap ${styles.text}`}>
+          <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap ${styles.text}`}>
             {currentSong.lyrics || (
               <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
             )}
@@ -501,6 +529,45 @@ export default function Teleprompter() {
             </div>
           </div>
 
+          {/* Orientation Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Orientation
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                data-testid="orientation-landscape"
+                onClick={() => setOrientation('landscape')}
+                className={`p-3 rounded-none border-2 transition-all ${
+                  orientation === 'landscape'
+                    ? 'border-yellow-400 bg-yellow-400/10'
+                    : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+                }`}
+              >
+                <div className="font-bold text-white text-sm flex items-center justify-center gap-2">
+                  <Monitor size={16} />
+                  Landscape
+                </div>
+                <div className="text-xs text-zinc-500 text-center mt-1">Desktop/Laptop</div>
+              </button>
+              <button
+                data-testid="orientation-portrait"
+                onClick={() => setOrientation('portrait')}
+                className={`p-3 rounded-none border-2 transition-all ${
+                  orientation === 'portrait'
+                    ? 'border-yellow-400 bg-yellow-400/10'
+                    : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+                }`}
+              >
+                <div className="font-bold text-white text-sm flex items-center justify-center gap-2">
+                  <Smartphone size={16} />
+                  Portrait
+                </div>
+                <div className="text-xs text-zinc-500 text-center mt-1">Mobile/Tablet</div>
+              </button>
+            </div>
+          </div>
+
           {/* Keyboard Shortcuts */}
           <div className="mt-6 pt-4 border-t border-zinc-800">
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2">
@@ -531,7 +598,7 @@ export default function Teleprompter() {
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2 text-center">
               Song Order (Drag to Reorder)
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className={`flex gap-2 pb-2 ${orientStyles.songNav}`}>
               {songs.map((song, index) => (
                 <button
                   key={song.id}
@@ -557,12 +624,12 @@ export default function Teleprompter() {
           </div>
 
           {/* Main Controls */}
-          <div className="flex items-center justify-center gap-4">
+          <div className={`${orientStyles.mainControls} items-center justify-center`}>
             <button
               data-testid="teleprompter-start"
               onClick={start}
               disabled={isPlaying && currentIndex === 0}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center justify-center gap-2"
             >
               <Play size={20} strokeWidth={2.5} />
               Start
@@ -572,16 +639,16 @@ export default function Teleprompter() {
               data-testid="teleprompter-prev"
               onClick={previous}
               disabled={currentIndex === 0}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center gap-2"
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center justify-center gap-2"
             >
               <ChevronLeft size={20} strokeWidth={1.5} />
-              Prev
+              {orientation === 'landscape' && 'Prev'}
             </button>
 
             <button
               data-testid="teleprompter-play-pause"
               onClick={togglePlayPause}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-8 py-3 flex items-center gap-2"
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-8 py-3 flex items-center justify-center gap-2"
             >
               {isPlaying ? (
                 <>
@@ -600,16 +667,16 @@ export default function Teleprompter() {
               data-testid="teleprompter-next"
               onClick={next}
               disabled={currentIndex === songs.length - 1}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center gap-2"
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center justify-center gap-2"
             >
-              Next
+              {orientation === 'landscape' && 'Next'}
               <ChevronRight size={20} strokeWidth={1.5} />
             </button>
 
             <button
               data-testid="teleprompter-stop"
               onClick={stop}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center justify-center gap-2"
             >
               <Square size={20} strokeWidth={2.5} />
               Stop
