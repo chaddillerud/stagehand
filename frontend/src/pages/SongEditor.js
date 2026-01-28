@@ -264,6 +264,13 @@ export default function SongEditor() {
         <LyricFormatter
           lyrics={lyrics}
           onApply={(formattedLyrics) => setLyrics(formattedLyrics)}
+          onApplyAndSave={(formattedLyrics) => {
+            setLyrics(formattedLyrics);
+            // Trigger save automatically
+            setTimeout(() => {
+              saveSong();
+            }, 100);
+          }}
           onClose={() => setShowFormatter(false)}
         />
       )}
