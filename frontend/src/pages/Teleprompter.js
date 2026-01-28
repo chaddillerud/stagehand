@@ -9,7 +9,10 @@ import {
   Square,
   ChevronLeft,
   ChevronRight,
-  GripVertical
+  GripVertical,
+  Settings,
+  Bluetooth,
+  X
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -25,10 +28,14 @@ export default function Teleprompter() {
   const [totalTime, setTotalTime] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
+  const [showSettings, setShowSettings] = useState(false);
+  const [footPedalConnected, setFootPedalConnected] = useState(false);
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const clockRef = useRef(null);
   const lyricsRef = useRef(null);
+  const gamepadRef = useRef(null);
 
   useEffect(() => {
     loadSetList();
@@ -38,12 +45,85 @@ export default function Teleprompter() {
       setCurrentTime(new Date());
     }, 1000);
     
+    // Keyboard shortcuts
+    const handleKeyPress = (e) => {
+      if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        e.preventDefault();
+        next();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        previous();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        stop();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        start();
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        setShowSettings(!showSettings);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyPress);
+    
+    // Gamepad/Foot Pedal polling
+    const pollGamepad = () => {
+      const gamepads = navigator.getGamepads();
+      if (gamepads && gamepads.length > 0) {
+        const gamepad = gamepads[0];
+        if (gamepad) {
+          if (!footPedalConnected) {
+            setFootPedalConnected(true);
+          }
+          
+          // Button 0 = Next
+          if (gamepad.buttons[0] && gamepad.buttons[0].pressed) {
+            if (!gamepadRef.current?.button0) {
+              next();
+            }
+            gamepadRef.current = { ...gamepadRef.current, button0: true };
+          } else {
+            gamepadRef.current = { ...gamepadRef.current, button0: false };
+          }
+          
+          // Button 1 = Previous
+          if (gamepad.buttons[1] && gamepad.buttons[1].pressed) {
+            if (!gamepadRef.current?.button1) {
+              previous();
+            }
+            gamepadRef.current = { ...gamepadRef.current, button1: true };
+          } else {
+            gamepadRef.current = { ...gamepadRef.current, button1: false };
+          }
+          
+          // Button 2 = Play/Pause
+          if (gamepad.buttons[2] && gamepad.buttons[2].pressed) {
+            if (!gamepadRef.current?.button2) {
+              togglePlayPause();
+            }
+            gamepadRef.current = { ...gamepadRef.current, button2: true };
+          } else {
+            gamepadRef.current = { ...gamepadRef.current, button2: false };
+          }
+        }
+      }
+      
+      requestAnimationFrame(pollGamepad);
+    };
+    
+    pollGamepad();
+    
     return () => {
       if (clockRef.current) {
         clearInterval(clockRef.current);
       }
+      window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [setlistId]);
+  }, [setlistId, isPlaying, currentIndex, showSettings]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -211,6 +291,46 @@ export default function Teleprompter() {
     });
   };
 
+  const getDisplayModeStyles = () => {
+    const modes = {
+      'default': {
+        bg: 'bg-black',
+        text: 'text-white',
+        headerBg: 'bg-zinc-900/95',
+        controlsBg: 'bg-zinc-900/95',
+        secondaryText: 'text-zinc-400',
+        accent: 'text-yellow-400'
+      },
+      'high-contrast': {
+        bg: 'bg-black',
+        text: 'text-white',
+        headerBg: 'bg-black',
+        controlsBg: 'bg-black',
+        secondaryText: 'text-white',
+        accent: 'text-white'
+      },
+      'stage-red': {
+        bg: 'bg-black',
+        text: 'text-red-500',
+        headerBg: 'bg-black',
+        controlsBg: 'bg-black',
+        secondaryText: 'text-red-400',
+        accent: 'text-red-500'
+      },
+      'daylight': {
+        bg: 'bg-white',
+        text: 'text-black',
+        headerBg: 'bg-white border-b-2 border-black',
+        controlsBg: 'bg-white border-t-2 border-black',
+        secondaryText: 'text-zinc-700',
+        accent: 'text-black'
+      }
+    };
+    return modes[displayMode] || modes.default;
+  };
+
+  const styles = getDisplayModeStyles();
+
   if (!setlist || songs.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black text-white">
@@ -226,12 +346,12 @@ export default function Teleprompter() {
 
   return (
     <div 
-      className="h-screen w-full bg-black text-white overflow-hidden flex flex-col"
+      className={`h-screen w-full ${styles.bg} ${styles.text} overflow-hidden flex flex-col`}
       onMouseMove={handleMouseMove}
     >
       {/* Header - Fixed */}
       <div 
-        className={`bg-zinc-900/95 backdrop-blur-sm border-b border-zinc-800 p-4 transition-all duration-300 ${
+        className={`${styles.headerBg} backdrop-blur-sm border-b border-zinc-800 p-4 transition-all duration-300 ${
           showControls ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
@@ -240,7 +360,7 @@ export default function Teleprompter() {
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Set List
             </div>
-            <div className="text-xl font-oswald font-bold uppercase text-yellow-400">
+            <div className={`text-xl font-oswald font-bold uppercase ${styles.accent}`}>
               {setlist.name}
             </div>
           </div>
@@ -249,7 +369,7 @@ export default function Teleprompter() {
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Current Time
             </div>
-            <div className="text-3xl font-mono font-bold text-white" data-testid="current-time">
+            <div className={`text-3xl font-mono font-bold ${styles.text}`} data-testid="current-time">
               {formatCurrentTime()}
             </div>
           </div>
@@ -258,13 +378,21 @@ export default function Teleprompter() {
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Performance Time
             </div>
-            <div className="text-2xl font-mono font-bold text-yellow-400">
+            <div className={`text-2xl font-mono font-bold ${styles.accent}`}>
               [{formatTime(elapsedTime)}] / [{formatTime(totalTime)}]
             </div>
-            <div className="text-sm font-mono text-zinc-400 mt-1">
+            <div className={`text-sm font-mono ${styles.secondaryText} mt-1`}>
               Est. End: {calculateEndTime()}
             </div>
           </div>
+
+          <button
+            data-testid="settings-toggle"
+            onClick={() => setShowSettings(!showSettings)}
+            className="text-zinc-500 hover:text-yellow-400 transition-colors"
+          >
+            <Settings size={24} strokeWidth={1.5} />
+          </button>
         </div>
       </div>
 
@@ -277,15 +405,15 @@ export default function Teleprompter() {
         <div className="max-w-4xl mx-auto">
           {/* Current Song Info */}
           <div className="mb-8">
-            <h1 className="text-4xl md:text-6xl lg:text-8xl font-mono font-bold leading-tight mb-4">
+            <h1 className={`text-4xl md:text-6xl lg:text-8xl font-mono font-bold leading-tight mb-4 ${styles.text}`}>
               {currentSong.name}
             </h1>
             {currentSong.artist && (
-              <div className="text-2xl md:text-3xl text-zinc-400 mb-4">
+              <div className={`text-2xl md:text-3xl ${styles.secondaryText} mb-4`}>
                 {currentSong.artist}
               </div>
             )}
-            <div className="flex gap-4 text-sm font-mono text-zinc-500">
+            <div className={`flex gap-4 text-sm font-mono ${styles.secondaryText}`}>
               <span data-testid="song-position">
                 Song {currentIndex + 1} of {songs.length}
               </span>
@@ -296,19 +424,19 @@ export default function Teleprompter() {
           </div>
 
           {/* Lyrics */}
-          <div className="text-3xl md:text-4xl lg:text-6xl font-mono font-bold leading-snug whitespace-pre-wrap">
+          <div className={`text-3xl md:text-4xl lg:text-6xl font-mono font-bold leading-snug whitespace-pre-wrap ${styles.text}`}>
             {currentSong.lyrics || (
-              <div className="text-zinc-700 italic">No lyrics available</div>
+              <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
             )}
           </div>
 
           {/* Notes */}
           {currentSong.notes && (
-            <div className="mt-8 p-6 bg-zinc-900/50 border border-zinc-800">
-              <div className="text-sm font-oswald uppercase tracking-wider text-yellow-400 mb-2">
+            <div className={`mt-8 p-6 ${displayMode === 'daylight' ? 'bg-zinc-100 border-2 border-zinc-300' : 'bg-zinc-900/50 border border-zinc-800'}`}>
+              <div className={`text-sm font-oswald uppercase tracking-wider ${styles.accent} mb-2`}>
                 Notes:
               </div>
-              <div className="text-lg text-zinc-300 whitespace-pre-wrap">
+              <div className={`text-lg ${styles.secondaryText} whitespace-pre-wrap`}>
                 {currentSong.notes}
               </div>
             </div>
@@ -316,9 +444,83 @@ export default function Teleprompter() {
         </div>
       </div>
 
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="fixed top-20 right-4 bg-zinc-900 border-2 border-yellow-400 rounded-none p-6 z-50 w-80">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-oswald font-bold uppercase text-yellow-400">
+              Display Settings
+            </h3>
+            <button
+              onClick={() => setShowSettings(false)}
+              className="text-zinc-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Foot Pedal Status */}
+          <div className="mb-6 p-3 bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center gap-2 mb-2">
+              <Bluetooth size={16} className={footPedalConnected ? 'text-green-500' : 'text-zinc-600'} />
+              <span className="text-sm font-oswald uppercase">
+                {footPedalConnected ? 'Foot Pedal Connected' : 'No Foot Pedal Detected'}
+              </span>
+            </div>
+            <div className="text-xs text-zinc-500">
+              Connect Bluetooth foot pedal or gamepad
+            </div>
+          </div>
+
+          {/* Display Mode Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Display Mode
+            </label>
+            <div className="space-y-2">
+              {[
+                { value: 'default', label: 'Default (Dark)', desc: 'Yellow accent, low light' },
+                { value: 'high-contrast', label: 'High Contrast', desc: 'Pure white on black' },
+                { value: 'stage-red', label: 'Stage Red', desc: 'Preserves night vision' },
+                { value: 'daylight', label: 'Daylight', desc: 'Black on white' }
+              ].map(mode => (
+                <button
+                  key={mode.value}
+                  data-testid={`display-mode-${mode.value}`}
+                  onClick={() => setDisplayMode(mode.value)}
+                  className={`w-full text-left p-3 rounded-none border-2 transition-all ${
+                    displayMode === mode.value
+                      ? 'border-yellow-400 bg-yellow-400/10'
+                      : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+                  }`}
+                >
+                  <div className="font-bold text-white text-sm">{mode.label}</div>
+                  <div className="text-xs text-zinc-500">{mode.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Keyboard Shortcuts */}
+          <div className="mt-6 pt-4 border-t border-zinc-800">
+            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2">
+              Keyboard Shortcuts
+            </div>
+            <div className="text-xs text-zinc-400 space-y-1">
+              <div><kbd className="bg-zinc-800 px-1 rounded">Space</kbd> Play/Pause</div>
+              <div><kbd className="bg-zinc-800 px-1 rounded">→</kbd> Next Song</div>
+              <div><kbd className="bg-zinc-800 px-1 rounded">←</kbd> Previous Song</div>
+              <div><kbd className="bg-zinc-800 px-1 rounded">Home</kbd> Start</div>
+              <div><kbd className="bg-zinc-800 px-1 rounded">Esc</kbd> Stop</div>
+              <div><kbd className="bg-zinc-800 px-1 rounded">S</kbd> Settings</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Controls - Fixed Bottom */}
       <div 
-        className={`bg-zinc-900/95 backdrop-blur-sm border-t border-zinc-800 p-4 transition-all duration-300 ${
+        className={`${styles.controlsBg} backdrop-blur-sm border-t border-zinc-800 p-4 transition-all duration-300 ${
           showControls ? 'translate-y-0' : 'translate-y-full'
         }`}
         data-testid="teleprompter-controls"
