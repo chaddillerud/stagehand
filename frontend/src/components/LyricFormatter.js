@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LyricFormatter({ lyrics, onApply, onClose }) {
   const [formatMode, setFormatMode] = useState('chords-above');
@@ -154,6 +155,7 @@ export default function LyricFormatter({ lyrics, onApply, onClose }) {
 
   const handleApply = () => {
     onApply(preview);
+    toast.success("Formatting applied! Click 'Save Changes' to save the song.");
     onClose();
   };
 
