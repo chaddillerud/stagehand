@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Plus, Music, Trash2, Edit, Upload } from "lucide-react";
+import { Plus, Music, Trash2, Edit, Upload, Download, FileJson } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -23,6 +23,8 @@ export default function Dashboard() {
   const [importFile, setImportFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreFile, setRestoreFile] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -165,6 +167,106 @@ export default function Dashboard() {
     navigate("/song/new");
   };
 
+  const exportBackup = async () => {
+    try {
+      const [setlistsRes, songsRes] = await Promise.all([
+        axios.get(`${API}/setlists`),
+        axios.get(`${API}/songs`)
+      ]);
+
+      const backup = {
+        version: "1.0",
+        exported_at: new Date().toISOString(),
+        setlists: setlistsRes.data,
+        songs: songsRes.data
+      };
+
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `stagehand-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success(`Backup created! ${setlistsRes.data.length} setlists, ${songsRes.data.length} songs`);
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      toast.error("Failed to create backup");
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!restoreFile) {
+      toast.error("Please select a backup file");
+      return;
+    }
+
+    try {
+      const text = await restoreFile.text();
+      const backup = JSON.parse(text);
+
+      if (!backup.version || !backup.songs || !backup.setlists) {
+        toast.error("Invalid backup file format");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `This will restore ${backup.songs.length} songs and ${backup.setlists.length} setlists.\n\nWarning: This will ADD to your existing data, not replace it.\n\nContinue?`
+      );
+
+      if (!confirmed) return;
+
+      // Import songs
+      let importedSongs = 0;
+      for (const song of backup.songs) {
+        try {
+          await axios.post(`${API}/songs`, {
+            name: song.name,
+            artist: song.artist,
+            key: song.key,
+            tempo: song.tempo,
+            duration: song.duration,
+            notes: song.notes,
+            lyrics: song.lyrics
+          });
+          importedSongs++;
+        } catch (error) {
+          console.error(`Error importing song ${song.name}:`, error);
+        }
+      }
+
+      // Reload data
+      await loadData();
+
+      // Import setlists (need to map old song IDs to new ones)
+      let importedSetlists = 0;
+      for (const setlist of backup.setlists) {
+        try {
+          // For now, create empty setlists (song ID mapping would be complex)
+          await axios.post(`${API}/setlists`, {
+            name: `${setlist.name} (Restored)`,
+            song_ids: []
+          });
+          importedSetlists++;
+        } catch (error) {
+          console.error(`Error importing setlist ${setlist.name}:`, error);
+        }
+      }
+
+      await loadData();
+      setRestoreFile(null);
+      setShowRestoreModal(false);
+
+      toast.success(`Restored! ${importedSongs} songs, ${importedSetlists} setlists. Note: Setlists are empty - you'll need to add songs manually.`);
+    } catch (error) {
+      console.error("Error restoring backup:", error);
+      toast.error("Failed to restore backup. Check file format.");
+    }
+  };
+
   const calculateTotalTime = (songIds) => {
     let totalSeconds = 0;
     songIds.forEach(songId => {
@@ -194,10 +296,32 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-5xl md:text-7xl font-oswald font-bold tracking-tighter uppercase text-yellow-400 mb-2">
-            StageHand
-          </h1>
-          <p className="text-zinc-400 text-lg">Your savage setlist maker & lyric teleprompter</p>
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-5xl md:text-7xl font-oswald font-bold tracking-tighter uppercase text-yellow-400 mb-2">
+                StageHand
+              </h1>
+              <p className="text-zinc-400 text-lg">Your savage setlist maker & lyric teleprompter</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                data-testid="export-backup-btn"
+                onClick={exportBackup}
+                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-600 px-6 py-3 flex items-center gap-2"
+              >
+                <Download size={20} strokeWidth={1.5} />
+                Backup
+              </button>
+              <button
+                data-testid="import-restore-btn"
+                onClick={() => setShowRestoreModal(true)}
+                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-600 px-6 py-3 flex items-center gap-2"
+              >
+                <Upload size={20} strokeWidth={1.5} />
+                Restore
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Set Lists Section */}
@@ -518,6 +642,52 @@ export default function Dashboard() {
                 }}
                 disabled={isTranscribing}
                 className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Restore Modal */}
+      {showRestoreModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border-2 border-purple-500 rounded-none p-8 max-w-md w-full">
+            <h3 className="text-2xl font-oswald font-bold uppercase mb-6 text-purple-400 flex items-center gap-2">
+              <FileJson size={24} strokeWidth={2} />
+              Restore Backup
+            </h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Upload a StageHand backup file (.json) to restore your songs and setlists.
+            </p>
+            <div className="bg-yellow-900/30 border border-yellow-600 p-3 rounded-none mb-4">
+              <p className="text-yellow-400 text-xs">
+                ⚠️ This will ADD data to your library, not replace it. Setlists will be created empty.
+              </p>
+            </div>
+            <input
+              data-testid="restore-file-input"
+              type="file"
+              accept=".json"
+              onChange={(e) => setRestoreFile(e.target.files[0])}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:bg-purple-600 file:text-white file:font-oswald file:uppercase file:font-bold file:cursor-pointer hover:file:bg-purple-700 mb-6"
+            />
+            <div className="flex gap-4">
+              <button
+                data-testid="restore-confirm"
+                onClick={handleRestore}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-purple-600 text-white hover:bg-purple-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3"
+              >
+                Restore
+              </button>
+              <button
+                data-testid="restore-cancel"
+                onClick={() => {
+                  setShowRestoreModal(false);
+                  setRestoreFile(null);
+                }}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3"
               >
                 Cancel
               </button>
