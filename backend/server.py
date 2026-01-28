@@ -9,6 +9,9 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
+import aiohttp
+import tempfile
+from emergentintegrations.llm.openai import OpenAISpeechToText
 
 
 ROOT_DIR = Path(__file__).parent
@@ -75,6 +78,11 @@ class SetListCreate(BaseModel):
 class SetListUpdate(BaseModel):
     name: Optional[str] = None
     song_ids: Optional[List[str]] = None
+
+class AudioTranscribeRequest(BaseModel):
+    url: Optional[str] = None
+    song_name: Optional[str] = None
+    artist: Optional[str] = None
 
 
 # Song Routes
@@ -172,6 +180,127 @@ async def import_song(file: UploadFile = File(...)):
     
     song_data = SongCreate(name=name, artist=artist, lyrics=lyrics)
     return await create_song(song_data)
+
+@api_router.post("/songs/transcribe-audio", status_code=201)
+async def transcribe_audio(file: UploadFile = File(...)):
+    """Transcribe audio file (.mp3, .wav, etc.) to lyrics using OpenAI Whisper"""
+    
+    # Validate file type
+    allowed_extensions = ['.mp3', '.wav', '.m4a', '.mp4', '.mpeg', '.mpga', '.webm']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+        )
+    
+    # Check file size (25MB limit)
+    content = await file.read()
+    if len(content) > 25 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 25MB")
+    
+    try:
+        # Initialize OpenAI STT with Emergent key
+        stt = OpenAISpeechToText(api_key=os.getenv("EMERGENT_LLM_KEY"))
+        
+        # Save to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        
+        # Transcribe
+        with open(tmp_path, "rb") as audio_file:
+            response = await stt.transcribe(
+                file=audio_file,
+                model="whisper-1",
+                response_format="text"
+            )
+        
+        # Clean up temp file
+        os.unlink(tmp_path)
+        
+        # Parse filename for song name (remove extension)
+        song_name = os.path.splitext(file.filename)[0]
+        
+        # Create song with transcribed lyrics
+        song_data = SongCreate(
+            name=song_name,
+            artist="",
+            lyrics=response
+        )
+        
+        return await create_song(song_data)
+        
+    except Exception as e:
+        logger.error(f"Transcription error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+
+@api_router.post("/songs/transcribe-url", status_code=201)
+async def transcribe_audio_url(request: AudioTranscribeRequest):
+    """Download audio from URL and transcribe to lyrics"""
+    
+    if not request.url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
+    try:
+        # Download audio file
+        async with aiohttp.ClientSession() as session:
+            async with session.get(request.url) as resp:
+                if resp.status != 200:
+                    raise HTTPException(status_code=400, detail="Failed to download audio from URL")
+                
+                content = await resp.read()
+                
+                # Check file size
+                if len(content) > 25 * 1024 * 1024:
+                    raise HTTPException(status_code=400, detail="File too large. Maximum size: 25MB")
+                
+                # Determine file extension from URL or content-type
+                content_type = resp.headers.get('content-type', '')
+                if 'audio/mpeg' in content_type or 'audio/mp3' in content_type:
+                    file_ext = '.mp3'
+                elif 'audio/wav' in content_type:
+                    file_ext = '.wav'
+                elif 'audio/mp4' in content_type:
+                    file_ext = '.m4a'
+                else:
+                    # Try to get from URL
+                    url_ext = os.path.splitext(request.url)[1].lower()
+                    file_ext = url_ext if url_ext in ['.mp3', '.wav', '.m4a', '.mp4', '.mpeg', '.mpga', '.webm'] else '.mp3'
+        
+        # Initialize OpenAI STT
+        stt = OpenAISpeechToText(api_key=os.getenv("EMERGENT_LLM_KEY"))
+        
+        # Save to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        
+        # Transcribe
+        with open(tmp_path, "rb") as audio_file:
+            response = await stt.transcribe(
+                file=audio_file,
+                model="whisper-1",
+                response_format="text"
+            )
+        
+        # Clean up temp file
+        os.unlink(tmp_path)
+        
+        # Create song with transcribed lyrics
+        song_data = SongCreate(
+            name=request.song_name or "Transcribed Song",
+            artist=request.artist or "",
+            lyrics=response
+        )
+        
+        return await create_song(song_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Transcription error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 
 # SetList Routes
