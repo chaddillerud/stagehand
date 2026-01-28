@@ -219,6 +219,13 @@ async def transcribe_audio(file: UploadFile = File(...)):
         # Clean up temp file
         os.unlink(tmp_path)
         
+        # Extract text from response (handle both string and object)
+        if isinstance(response, str):
+            transcribed_text = response
+        else:
+            # If it's an object, try to get the text attribute
+            transcribed_text = getattr(response, 'text', str(response))
+        
         # Parse filename for song name (remove extension)
         song_name = os.path.splitext(file.filename)[0]
         
@@ -226,7 +233,7 @@ async def transcribe_audio(file: UploadFile = File(...)):
         song_data = SongCreate(
             name=song_name,
             artist="",
-            lyrics=response
+            lyrics=transcribed_text
         )
         
         return await create_song(song_data)
@@ -333,11 +340,18 @@ async def transcribe_audio_url(request: AudioTranscribeRequest):
         # Clean up temp file
         os.unlink(tmp_path)
         
+        # Extract text from response (handle both string and object)
+        if isinstance(response, str):
+            transcribed_text = response
+        else:
+            # If it's an object, try to get the text attribute
+            transcribed_text = getattr(response, 'text', str(response))
+        
         # Create song with transcribed lyrics
         song_data = SongCreate(
             name=request.song_name or "Transcribed Song",
             artist=request.artist or "",
-            lyrics=response
+            lyrics=transcribed_text
         )
         
         return await create_song(song_data)
