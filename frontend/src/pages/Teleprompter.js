@@ -574,8 +574,8 @@ export default function Teleprompter() {
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className="fixed top-20 right-4 bg-zinc-900 border-2 border-yellow-400 rounded-none p-6 z-50 w-80">
-          <div className="flex items-center justify-between mb-4">
+        <div className="fixed top-20 right-4 bg-zinc-900 border-2 border-yellow-400 rounded-none p-6 z-50 w-80 max-h-[calc(100vh-120px)] overflow-y-auto">
+          <div className="flex items-center justify-between mb-4 sticky top-0 bg-zinc-900 pb-2 border-b border-zinc-800">
             <h3 className="text-xl font-oswald font-bold uppercase text-yellow-400">
               Display Settings
             </h3>
