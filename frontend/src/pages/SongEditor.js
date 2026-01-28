@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
+import LyricFormatter from "../components/LyricFormatter";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -20,6 +21,7 @@ export default function SongEditor() {
   const [notes, setNotes] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [loading, setLoading] = useState(!isNew);
+  const [showFormatter, setShowFormatter] = useState(false);
 
   useEffect(() => {
     if (!isNew) {
@@ -232,9 +234,19 @@ export default function SongEditor() {
 
           {/* Lyrics */}
           <div>
-            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-              Lyrics
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400">
+                Lyrics
+              </label>
+              <button
+                data-testid="format-lyrics-btn"
+                onClick={() => setShowFormatter(true)}
+                className="text-xs font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all px-4 py-2 rounded-none flex items-center gap-2"
+              >
+                <Wand2 size={14} strokeWidth={2} />
+                Format Lyrics
+              </button>
+            </div>
             <textarea
               data-testid="song-lyrics-input"
               value={lyrics}
@@ -246,6 +258,15 @@ export default function SongEditor() {
           </div>
         </div>
       </div>
+
+      {/* Lyric Formatter Modal */}
+      {showFormatter && (
+        <LyricFormatter
+          lyrics={lyrics}
+          onApply={(formattedLyrics) => setLyrics(formattedLyrics)}
+          onClose={() => setShowFormatter(false)}
+        />
+      )}
     </div>
   );
 }
