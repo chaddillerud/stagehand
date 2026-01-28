@@ -113,6 +113,22 @@ export default function Dashboard() {
     navigate("/song/new");
   };
 
+  const calculateTotalTime = (songIds) => {
+    let totalSeconds = 0;
+    songIds.forEach(songId => {
+      const song = songs.find(s => s.id === songId);
+      if (song && song.duration) {
+        const parts = song.duration.split(':');
+        if (parts.length === 2) {
+          totalSeconds += parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+      }
+    });
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -175,7 +191,7 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div className="font-mono text-sm text-zinc-500">
-                    [{setlist.song_ids.length}] SONGS
+                    [{setlist.song_ids.length}] SONGS / {calculateTotalTime(setlist.song_ids)}
                   </div>
                 </div>
               ))}
