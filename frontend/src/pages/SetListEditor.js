@@ -21,6 +21,21 @@ export default function SetListEditor() {
     loadData();
   }, [id]);
 
+  const calculateTotalTime = (songsList) => {
+    let totalSeconds = 0;
+    songsList.forEach(song => {
+      if (song.duration) {
+        const parts = song.duration.split(':');
+        if (parts.length === 2) {
+          totalSeconds += parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+      }
+    });
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${String(secs).padStart(2, '0')}`;
+  };
+
   const loadData = async () => {
     try {
       const [setlistRes, allSongsRes] = await Promise.all([
@@ -168,7 +183,7 @@ export default function SetListEditor() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-oswald font-bold uppercase text-white">
-              Songs [{songs.length}]
+              Songs [{songs.length}] / {calculateTotalTime(songs)}
             </h2>
             <button
               data-testid="add-song-to-setlist-btn"
