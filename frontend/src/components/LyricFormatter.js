@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Wand2 } from "lucide-react";
 
 export default function LyricFormatter({ lyrics, onApply, onClose }) {
@@ -143,14 +143,13 @@ export default function LyricFormatter({ lyrics, onApply, onClose }) {
     return text;
   };
 
-  // Update preview when mode changes
-  useState(() => {
+  // Update preview when mode changes or lyrics change
+  useEffect(() => {
     setPreview(formatLyrics(lyrics, formatMode));
   }, [formatMode, lyrics]);
 
   const handleFormatChange = (mode) => {
     setFormatMode(mode);
-    setPreview(formatLyrics(lyrics, mode));
   };
 
   const handleApply = () => {
