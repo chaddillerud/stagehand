@@ -551,7 +551,7 @@ export default function Teleprompter() {
         className="flex-1 overflow-y-auto p-8 md:p-16"
         data-testid="lyrics-display"
       >
-        <div className="max-w-4xl mx-auto">
+        <div className={`mx-auto ${orientation === 'portrait' ? 'max-w-4xl' : 'max-w-7xl'}`}>
           {/* Current Song Info */}
           <div className="mb-8">
             <h1 className={`${orientStyles.songTitle} font-mono font-bold leading-tight mb-4 ${styles.text}`}>
