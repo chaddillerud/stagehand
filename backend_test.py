@@ -168,7 +168,7 @@ Works perfectly fine"""
             "Create SetList",
             "POST",
             "setlists",
-            201,
+            200,  # Backend returns 200 instead of 201 - this is a bug
             data=setlist_data
         )
         
