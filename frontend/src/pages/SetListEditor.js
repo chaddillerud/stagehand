@@ -86,6 +86,10 @@ export default function SetListEditor() {
     setSongs(songs.filter(s => s.id !== songId));
   };
 
+  const openSongEditor = (songId) => {
+    navigate(`/song/${songId}`);
+  };
+
   const moveSong = (index, direction) => {
     const newSongs = [...songs];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
@@ -209,7 +213,9 @@ export default function SetListEditor() {
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
+                  onDoubleClick={() => openSongEditor(song.id)}
                   className="bg-zinc-900 border border-zinc-800 rounded-none p-4 flex items-center gap-4 group hover:border-zinc-700 transition-colors cursor-move"
+                  title="Double-click to edit song"
                 >
                   <div className="flex items-center text-zinc-600 group-hover:text-zinc-400 transition-colors">
                     <GripVertical size={20} strokeWidth={1.5} />
