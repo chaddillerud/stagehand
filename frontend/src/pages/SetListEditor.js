@@ -81,6 +81,29 @@ export default function SetListEditor() {
     setSongs(newSongs);
   };
 
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/html'));
+    
+    if (dragIndex === dropIndex) return;
+    
+    const newSongs = [...songs];
+    const draggedSong = newSongs[dragIndex];
+    newSongs.splice(dragIndex, 1);
+    newSongs.splice(dropIndex, 0, draggedSong);
+    setSongs(newSongs);
+  };
+
   const openTeleprompter = () => {
     saveSetList();
     const url = `/prompter/${id}`;
@@ -167,25 +190,14 @@ export default function SetListEditor() {
                 <div
                   key={song.id}
                   data-testid={`setlist-song-${song.id}`}
-                  className="bg-zinc-900 border border-zinc-800 rounded-none p-4 flex items-center gap-4 group hover:border-zinc-700 transition-colors"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  className="bg-zinc-900 border border-zinc-800 rounded-none p-4 flex items-center gap-4 group hover:border-zinc-700 transition-colors cursor-move"
                 >
-                  <div className="flex flex-col gap-1">
-                    <button
-                      data-testid={`move-song-up-${song.id}`}
-                      onClick={() => moveSong(index, 'up')}
-                      disabled={index === 0}
-                      className="text-zinc-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <GripVertical size={16} strokeWidth={1.5} />
-                    </button>
-                    <button
-                      data-testid={`move-song-down-${song.id}`}
-                      onClick={() => moveSong(index, 'down')}
-                      disabled={index === songs.length - 1}
-                      className="text-zinc-600 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <GripVertical size={16} strokeWidth={1.5} />
-                    </button>
+                  <div className="flex items-center text-zinc-600 group-hover:text-zinc-400 transition-colors">
+                    <GripVertical size={20} strokeWidth={1.5} />
                   </div>
 
                   <div className="font-mono text-sm text-zinc-500 w-8">
