@@ -13,8 +13,15 @@ export default function Dashboard() {
   const [songs, setSongs] = useState([]);
   const [showNewSetListModal, setShowNewSetListModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showTranscribeModal, setShowTranscribeModal] = useState(false);
+  const [transcribeMode, setTranscribeMode] = useState('file'); // 'file' or 'url'
+  const [audioUrl, setAudioUrl] = useState('');
+  const [transcribeSongName, setTranscribeSongName] = useState('');
+  const [transcribeArtist, setTranscribeArtist] = useState('');
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [newSetListName, setNewSetListName] = useState("");
   const [importFile, setImportFile] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -106,6 +113,51 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Error importing song:", error);
       toast.error("Failed to import song");
+    }
+  };
+
+  const handleTranscribeAudio = async () => {
+    if (transcribeMode === 'file' && !audioFile) {
+      toast.error("Please select an audio file");
+      return;
+    }
+    if (transcribeMode === 'url' && !audioUrl.trim()) {
+      toast.error("Please enter an audio URL");
+      return;
+    }
+
+    setIsTranscribing(true);
+
+    try {
+      let response;
+      
+      if (transcribeMode === 'file') {
+        const formData = new FormData();
+        formData.append("file", audioFile);
+        
+        response = await axios.post(`${API}/songs/transcribe-audio`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+      } else {
+        response = await axios.post(`${API}/songs/transcribe-url`, {
+          url: audioUrl,
+          song_name: transcribeSongName || undefined,
+          artist: transcribeArtist || undefined
+        });
+      }
+      
+      setSongs([...songs, response.data]);
+      setAudioFile(null);
+      setAudioUrl('');
+      setTranscribeSongName('');
+      setTranscribeArtist('');
+      setShowTranscribeModal(false);
+      setIsTranscribing(false);
+      toast.success("Audio transcribed! Song created with lyrics.");
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+      toast.error(error.response?.data?.detail || "Failed to transcribe audio");
+      setIsTranscribing(false);
     }
   };
 
@@ -206,6 +258,14 @@ export default function Dashboard() {
               Songs Library
             </h2>
             <div className="flex gap-4">
+              <button
+                data-testid="transcribe-audio-btn"
+                onClick={() => setShowTranscribeModal(true)}
+                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 border-2 border-green-600 px-6 py-3 flex items-center gap-2"
+              >
+                <Music size={20} strokeWidth={1.5} />
+                Transcribe Audio
+              </button>
               <button
                 data-testid="import-song-btn"
                 onClick={() => setShowImportModal(true)}
@@ -340,6 +400,115 @@ export default function Dashboard() {
                   setImportFile(null);
                 }}
                 className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transcribe Audio Modal */}
+      {showTranscribeModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border-2 border-green-500 rounded-none p-8 max-w-lg w-full">
+            <h3 className="text-2xl font-oswald font-bold uppercase mb-6 text-green-400">
+              Transcribe Audio to Lyrics
+            </h3>
+            
+            {/* Mode Selection */}
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setTranscribeMode('file')}
+                className={`flex-1 py-2 px-4 rounded-none font-oswald uppercase text-sm transition-all ${
+                  transcribeMode === 'file'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                Upload File
+              </button>
+              <button
+                onClick={() => setTranscribeMode('url')}
+                className={`flex-1 py-2 px-4 rounded-none font-oswald uppercase text-sm transition-all ${
+                  transcribeMode === 'url'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                }`}
+              >
+                From URL
+              </button>
+            </div>
+
+            {transcribeMode === 'file' ? (
+              <>
+                <p className="text-zinc-400 text-sm mb-4">
+                  Upload audio file (.mp3, .wav, .m4a, .mp4, .webm). Max 25MB.
+                </p>
+                <input
+                  data-testid="audio-file-input"
+                  type="file"
+                  accept=".mp3,.wav,.m4a,.mp4,.mpeg,.mpga,.webm"
+                  onChange={(e) => setAudioFile(e.target.files[0])}
+                  disabled={isTranscribing}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:bg-green-600 file:text-white file:font-oswald file:uppercase file:font-bold file:cursor-pointer hover:file:bg-green-700 disabled:opacity-50 mb-6"
+                />
+              </>
+            ) : (
+              <>
+                <p className="text-zinc-400 text-sm mb-4">
+                  Paste URL to audio file (.mp3, .wav, etc.). Max 25MB.
+                </p>
+                <input
+                  data-testid="audio-url-input"
+                  type="url"
+                  placeholder="https://example.com/song.mp3"
+                  value={audioUrl}
+                  onChange={(e) => setAudioUrl(e.target.value)}
+                  disabled={isTranscribing}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none disabled:opacity-50 mb-4"
+                />
+                <input
+                  data-testid="transcribe-song-name-input"
+                  type="text"
+                  placeholder="Song Name (optional)"
+                  value={transcribeSongName}
+                  onChange={(e) => setTranscribeSongName(e.target.value)}
+                  disabled={isTranscribing}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none disabled:opacity-50 mb-4"
+                />
+                <input
+                  data-testid="transcribe-artist-input"
+                  type="text"
+                  placeholder="Artist (optional)"
+                  value={transcribeArtist}
+                  onChange={(e) => setTranscribeArtist(e.target.value)}
+                  disabled={isTranscribing}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none disabled:opacity-50 mb-6"
+                />
+              </>
+            )}
+
+            <div className="flex gap-4">
+              <button
+                data-testid="transcribe-confirm"
+                onClick={handleTranscribeAudio}
+                disabled={isTranscribing}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isTranscribing ? 'Transcribing...' : 'Transcribe'}
+              </button>
+              <button
+                data-testid="transcribe-cancel"
+                onClick={() => {
+                  setShowTranscribeModal(false);
+                  setAudioFile(null);
+                  setAudioUrl('');
+                  setTranscribeSongName('');
+                  setTranscribeArtist('');
+                }}
+                disabled={isTranscribing}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3 disabled:opacity-50"
               >
                 Cancel
               </button>
