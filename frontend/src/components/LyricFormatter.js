@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LyricFormatter({ lyrics, onApply, onClose }) {
+export default function LyricFormatter({ lyrics, onApply, onClose, onApplyAndSave }) {
   const [formatMode, setFormatMode] = useState('chords-above');
   const [preview, setPreview] = useState('');
 
@@ -159,6 +159,16 @@ export default function LyricFormatter({ lyrics, onApply, onClose }) {
     onClose();
   };
 
+  const handleApplyAndSave = () => {
+    if (onApplyAndSave) {
+      onApplyAndSave(preview);
+      toast.success("Formatting applied and saved!");
+      onClose();
+    } else {
+      handleApply();
+    }
+  };
+
   const hasChords = detectChords(lyrics);
 
   return (
@@ -273,16 +283,23 @@ export default function LyricFormatter({ lyrics, onApply, onClose }) {
         {/* Actions */}
         <div className="p-6 border-t border-zinc-800 flex gap-4">
           <button
+            onClick={handleApplyAndSave}
+            data-testid="format-apply-save"
+            className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3"
+          >
+            Apply & Save
+          </button>
+          <button
             onClick={handleApply}
             data-testid="format-apply"
             className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3"
           >
-            Apply Formatting
+            Apply Only
           </button>
           <button
             onClick={onClose}
             data-testid="format-cancel"
-            className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3"
+            className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3"
           >
             Cancel
           </button>
