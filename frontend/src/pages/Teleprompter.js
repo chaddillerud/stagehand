@@ -32,6 +32,8 @@ export default function Teleprompter() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
+  const [scrollSpeed, setScrollSpeed] = useState(1.0); // 1.0 = 100%, range 0.5 to 2.0
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
   const timerRef = useRef(null);
@@ -148,6 +150,49 @@ export default function Teleprompter() {
     };
   }, [isPlaying]);
 
+  // Auto-scroll effect
+  useEffect(() => {
+    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current) return;
+
+    const currentSong = songs[currentIndex];
+    if (!currentSong || !currentSong.duration) return;
+
+    // Parse duration (MM:SS format)
+    const parseDuration = (durationStr) => {
+      const parts = durationStr.split(':');
+      if (parts.length === 2) {
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      }
+      return 0;
+    };
+
+    const songDurationSeconds = parseDuration(currentSong.duration);
+    if (songDurationSeconds === 0) return;
+
+    // Calculate scroll parameters
+    const container = lyricsRef.current;
+    const totalScrollHeight = container.scrollHeight - container.clientHeight;
+    
+    if (totalScrollHeight <= 0) return;
+
+    // Pixels per second adjusted by speed multiplier
+    const pixelsPerSecond = (totalScrollHeight / songDurationSeconds) * scrollSpeed;
+    
+    // Scroll at 60fps
+    const frameRate = 60;
+    const pixelsPerFrame = pixelsPerSecond / frameRate;
+
+    const scrollInterval = setInterval(() => {
+      if (container.scrollTop < totalScrollHeight) {
+        container.scrollTop += pixelsPerFrame;
+      }
+    }, 1000 / frameRate);
+
+    return () => {
+      clearInterval(scrollInterval);
+    };
+  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs]);
+
   useEffect(() => {
     // Calculate total time for set list
     let total = 0;
@@ -237,12 +282,20 @@ export default function Teleprompter() {
     setIsPlaying(true);
     setElapsedTime(0);
     setCurrentIndex(0);
+    // Reset scroll position
+    if (lyricsRef.current) {
+      lyricsRef.current.scrollTop = 0;
+    }
   };
 
   const stop = () => {
     setIsPlaying(false);
     setElapsedTime(0);
     setCurrentIndex(0);
+    // Reset scroll position
+    if (lyricsRef.current) {
+      lyricsRef.current.scrollTop = 0;
+    }
   };
 
   const togglePlayPause = () => {
@@ -252,17 +305,29 @@ export default function Teleprompter() {
   const previous = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
+      // Reset scroll position for new song
+      if (lyricsRef.current) {
+        lyricsRef.current.scrollTop = 0;
+      }
     }
   };
 
   const next = () => {
     if (currentIndex < songs.length - 1) {
       setCurrentIndex(currentIndex + 1);
+      // Reset scroll position for new song
+      if (lyricsRef.current) {
+        lyricsRef.current.scrollTop = 0;
+      }
     }
   };
 
   const skipTo = (index) => {
     setCurrentIndex(index);
+    // Reset scroll position for new song
+    if (lyricsRef.current) {
+      lyricsRef.current.scrollTop = 0;
+    }
   };
 
   const handleSongDragStart = (e, index) => {
@@ -601,6 +666,64 @@ export default function Teleprompter() {
                 <div className="text-xs text-zinc-500 text-center mt-1">Mobile/Tablet</div>
               </button>
             </div>
+          </div>
+
+          {/* Auto-Scroll Settings */}
+          <div className="mb-4 pt-4 border-t border-zinc-800">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Auto-Scroll
+            </label>
+            
+            <div className="flex items-center justify-between mb-3 p-3 bg-zinc-950 border border-zinc-800">
+              <div>
+                <div className="text-white font-bold text-sm">Enable Auto-Scroll</div>
+                <div className="text-xs text-zinc-500">
+                  {autoScrollEnabled ? 'Scrolls based on song duration' : 'Manual control only'}
+                </div>
+              </div>
+              <button
+                data-testid="auto-scroll-toggle"
+                onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                className={`w-12 h-6 rounded-full transition-all relative ${
+                  autoScrollEnabled ? 'bg-green-600' : 'bg-zinc-700'
+                }`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${
+                  autoScrollEnabled ? 'right-0.5' : 'left-0.5'
+                }`} />
+              </button>
+            </div>
+
+            {autoScrollEnabled && (
+              <div className="p-3 bg-zinc-950 border border-zinc-800">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-zinc-400">Scroll Speed</span>
+                  <span className="text-sm font-mono font-bold text-yellow-400">
+                    {Math.round(scrollSpeed * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="2.0"
+                  step="0.1"
+                  value={scrollSpeed}
+                  onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
+                  className="w-full accent-yellow-400"
+                  data-testid="scroll-speed-slider"
+                />
+                <div className="flex justify-between text-xs text-zinc-600 mt-1">
+                  <span>50%</span>
+                  <span>100%</span>
+                  <span>200%</span>
+                </div>
+                <div className="text-xs text-zinc-500 mt-2">
+                  {!songs[currentIndex]?.duration && (
+                    <div className="text-yellow-500">⚠ Current song has no duration set</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Keyboard Shortcuts */}
