@@ -385,18 +385,18 @@ export default function Dashboard() {
               <button
                 data-testid="transcribe-audio-btn"
                 onClick={() => setShowTranscribeModal(true)}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 border-2 border-green-600 px-6 py-3 flex items-center gap-2"
+                title="Transcribe Audio to Lyrics"
+                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-green-400 hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
               >
-                <Music size={20} strokeWidth={1.5} />
-                Transcribe Audio
+                <Music size={18} strokeWidth={1.5} />
               </button>
               <button
                 data-testid="import-song-btn"
                 onClick={() => setShowImportModal(true)}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3 flex items-center gap-2"
+                title="Import .txt File"
+                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
               >
-                <Upload size={20} strokeWidth={1.5} />
-                Import .txt
+                <Upload size={18} strokeWidth={1.5} />
               </button>
               <button
                 data-testid="create-song-btn"

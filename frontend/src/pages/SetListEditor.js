@@ -168,22 +168,22 @@ export default function SetListEditor() {
             />
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               data-testid="save-setlist-btn"
               onClick={saveSetList}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              title="Save Changes"
+              className="rounded-none bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
             >
-              <Save size={20} strokeWidth={2.5} />
-              Save Changes
+              <Save size={18} strokeWidth={2} />
             </button>
             <button
               data-testid="print-setlist-btn"
               onClick={openPrintView}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              title="Print View"
+              className="rounded-none bg-zinc-800 text-zinc-400 hover:text-blue-400 hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
             >
-              <Printer size={20} strokeWidth={1.5} />
-              Print View
+              <Printer size={18} strokeWidth={1.5} />
             </button>
             <button
               data-testid="open-teleprompter-btn"
