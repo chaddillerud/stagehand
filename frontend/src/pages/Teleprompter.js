@@ -24,12 +24,25 @@ export default function Teleprompter() {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
+  const clockRef = useRef(null);
   const lyricsRef = useRef(null);
 
   useEffect(() => {
     loadSetList();
+    
+    // Start clock
+    clockRef.current = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    
+    return () => {
+      if (clockRef.current) {
+        clearInterval(clockRef.current);
+      }
+    };
   }, [setlistId]);
 
   useEffect(() => {
@@ -180,6 +193,24 @@ export default function Teleprompter() {
     return `${mins}:${String(secs).padStart(2, '0')}`;
   };
 
+  const formatCurrentTime = () => {
+    return currentTime.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const calculateEndTime = () => {
+    const endTime = new Date(currentTime.getTime() + (totalTime - elapsedTime) * 1000);
+    return endTime.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
   if (!setlist || songs.length === 0) {
     return (
       <div className="h-screen flex items-center justify-center bg-black text-white">
@@ -204,7 +235,7 @@ export default function Teleprompter() {
           showControls ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-8">
           <div>
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Set List
@@ -213,12 +244,25 @@ export default function Teleprompter() {
               {setlist.name}
             </div>
           </div>
+          
+          <div className="text-center">
+            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
+              Current Time
+            </div>
+            <div className="text-3xl font-mono font-bold text-white" data-testid="current-time">
+              {formatCurrentTime()}
+            </div>
+          </div>
+
           <div className="text-right">
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Performance Time
             </div>
             <div className="text-2xl font-mono font-bold text-yellow-400">
               [{formatTime(elapsedTime)}] / [{formatTime(totalTime)}]
+            </div>
+            <div className="text-sm font-mono text-zinc-400 mt-1">
+              Est. End: {calculateEndTime()}
             </div>
           </div>
         </div>
