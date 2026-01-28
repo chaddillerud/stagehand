@@ -160,8 +160,23 @@ export default function Teleprompter() {
       autoScrollIntervalRef.current = null;
     }
 
-    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) {
-      console.log('Auto-scroll: Conditions not met', { autoScrollEnabled, isPlaying, hasSongs: songs.length > 0 });
+    if (!autoScrollEnabled) {
+      console.log('Auto-scroll: Disabled');
+      return;
+    }
+
+    if (!isPlaying) {
+      console.log('Auto-scroll: Not playing');
+      return;
+    }
+
+    if (!lyricsRef.current) {
+      console.log('Auto-scroll: No lyrics ref');
+      return;
+    }
+
+    if (songs.length === 0) {
+      console.log('Auto-scroll: No songs');
       return;
     }
 
@@ -195,33 +210,33 @@ export default function Teleprompter() {
       return;
     }
 
-    console.log(`✅ Auto-scroll STARTING: ${totalScrollHeight}px over ${songDurationSeconds}s at ${scrollSpeed}x speed`);
-
     // Pixels per second adjusted by speed multiplier
     const pixelsPerSecond = (totalScrollHeight / songDurationSeconds) * scrollSpeed;
-    
-    // Scroll at 60fps
     const frameRate = 60;
     const pixelsPerFrame = pixelsPerSecond / frameRate;
 
-    console.log(`Scroll params: ${pixelsPerFrame.toFixed(3)} px/frame (${pixelsPerSecond.toFixed(2)} px/sec)`);
+    console.log(`✅ AUTO-SCROLL ACTIVE: ${pixelsPerFrame.toFixed(3)}px/frame, ${totalScrollHeight}px over ${songDurationSeconds}s`);
 
+    // Start scrolling
     autoScrollIntervalRef.current = setInterval(() => {
-      if (container.scrollTop < totalScrollHeight) {
+      const container = lyricsRef.current;
+      if (!container) return;
+      
+      const maxScroll = container.scrollHeight - container.clientHeight;
+      if (container.scrollTop < maxScroll) {
         container.scrollTop += pixelsPerFrame;
-      } else {
-        console.log('Auto-scroll: Reached end of lyrics');
       }
     }, 1000 / frameRate);
 
+    // Cleanup function
     return () => {
       if (autoScrollIntervalRef.current) {
-        console.log('Auto-scroll: Cleanup - stopping interval');
+        console.log('Auto-scroll: Cleanup');
         clearInterval(autoScrollIntervalRef.current);
         autoScrollIntervalRef.current = null;
       }
     };
-  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs]);
+  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed]);
 
   useEffect(() => {
     // Calculate total time for set list
