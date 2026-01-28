@@ -242,12 +242,29 @@ async def transcribe_audio_url(request: AudioTranscribeRequest):
     if not request.url:
         raise HTTPException(status_code=400, detail="URL is required")
     
+    # Validate URL format
+    if not request.url.startswith(('http://', 'https://')):
+        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+    
     try:
         # Download audio file
         async with aiohttp.ClientSession() as session:
-            async with session.get(request.url) as resp:
+            async with session.get(request.url, timeout=aiohttp.ClientTimeout(total=30)) as resp:
                 if resp.status != 200:
-                    raise HTTPException(status_code=400, detail="Failed to download audio from URL")
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Failed to download audio from URL. HTTP Status: {resp.status}. Make sure the URL is a direct link to an audio file, not a webpage."
+                    )
+                
+                # Check content type
+                content_type = resp.headers.get('content-type', '').lower()
+                
+                # Check if it's HTML (common mistake)
+                if 'text/html' in content_type or 'text/plain' in content_type:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="URL points to a webpage, not an audio file. Please provide a direct link to an audio file (e.g., https://example.com/song.mp3)"
+                    )
                 
                 content = await resp.read()
                 
@@ -255,18 +272,36 @@ async def transcribe_audio_url(request: AudioTranscribeRequest):
                 if len(content) > 25 * 1024 * 1024:
                     raise HTTPException(status_code=400, detail="File too large. Maximum size: 25MB")
                 
+                # Check if content is too small (likely not audio)
+                if len(content) < 1024:  # Less than 1KB
+                    raise HTTPException(
+                        status_code=400,
+                        detail="File too small to be a valid audio file. Make sure the URL points directly to an audio file."
+                    )
+                
                 # Determine file extension from URL or content-type
-                content_type = resp.headers.get('content-type', '')
                 if 'audio/mpeg' in content_type or 'audio/mp3' in content_type:
                     file_ext = '.mp3'
-                elif 'audio/wav' in content_type:
+                elif 'audio/wav' in content_type or 'audio/x-wav' in content_type:
                     file_ext = '.wav'
-                elif 'audio/mp4' in content_type:
+                elif 'audio/mp4' in content_type or 'audio/m4a' in content_type:
                     file_ext = '.m4a'
+                elif 'audio/webm' in content_type:
+                    file_ext = '.webm'
+                elif 'audio/ogg' in content_type:
+                    file_ext = '.ogg'
+                elif 'audio/flac' in content_type:
+                    file_ext = '.flac'
                 else:
                     # Try to get from URL
                     url_ext = os.path.splitext(request.url)[1].lower()
-                    file_ext = url_ext if url_ext in ['.mp3', '.wav', '.m4a', '.mp4', '.mpeg', '.mpga', '.webm'] else '.mp3'
+                    if url_ext in ['.mp3', '.wav', '.m4a', '.mp4', '.mpeg', '.mpga', '.webm', '.ogg', '.flac']:
+                        file_ext = url_ext
+                    else:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=f"Unable to determine audio format. Content-Type: {content_type}. URL must end with a supported audio extension (.mp3, .wav, .m4a, etc.)"
+                        )
         
         # Initialize OpenAI STT
         stt = OpenAISpeechToText(api_key=os.getenv("EMERGENT_LLM_KEY"))
@@ -277,12 +312,23 @@ async def transcribe_audio_url(request: AudioTranscribeRequest):
             tmp_path = tmp_file.name
         
         # Transcribe
-        with open(tmp_path, "rb") as audio_file:
-            response = await stt.transcribe(
-                file=audio_file,
-                model="whisper-1",
-                response_format="text"
-            )
+        try:
+            with open(tmp_path, "rb") as audio_file:
+                response = await stt.transcribe(
+                    file=audio_file,
+                    model="whisper-1",
+                    response_format="text"
+                )
+        except Exception as transcribe_error:
+            # Clean up temp file
+            os.unlink(tmp_path)
+            error_msg = str(transcribe_error)
+            if "Invalid file format" in error_msg:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid audio file format. The file must be a valid audio file in one of these formats: mp3, wav, m4a, mp4, mpeg, mpga, webm, ogg, flac. Make sure the URL points to a direct audio file, not a webpage or streaming service."
+                )
+            raise
         
         # Clean up temp file
         os.unlink(tmp_path)
