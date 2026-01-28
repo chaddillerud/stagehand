@@ -303,22 +303,22 @@ export default function Dashboard() {
               </h1>
               <p className="text-zinc-400 text-lg">Your savage setlist maker & lyric teleprompter</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 data-testid="export-backup-btn"
                 onClick={exportBackup}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-600 px-6 py-3 flex items-center gap-2"
+                title="Backup all data"
+                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
               >
-                <Download size={20} strokeWidth={1.5} />
-                Backup
+                <Download size={18} strokeWidth={1.5} />
               </button>
               <button
                 data-testid="import-restore-btn"
                 onClick={() => setShowRestoreModal(true)}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-purple-600 text-white hover:bg-purple-700 border-2 border-purple-600 px-6 py-3 flex items-center gap-2"
+                title="Restore from backup"
+                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
               >
-                <Upload size={20} strokeWidth={1.5} />
-                Restore
+                <Upload size={18} strokeWidth={1.5} />
               </button>
             </div>
           </div>
