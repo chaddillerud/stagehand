@@ -457,7 +457,8 @@ export default function Dashboard() {
             ) : (
               <>
                 <p className="text-zinc-400 text-sm mb-4">
-                  Paste URL to audio file (.mp3, .wav, etc.). Max 25MB.
+                  Paste URL to audio file (.mp3, .wav, etc.). Max 25MB.<br/>
+                  <span className="text-yellow-400">⚠ Must be a direct link to audio file, not a webpage or streaming service.</span>
                 </p>
                 <input
                   data-testid="audio-url-input"
@@ -468,6 +469,14 @@ export default function Dashboard() {
                   disabled={isTranscribing}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none disabled:opacity-50 mb-4"
                 />
+                <div className="bg-zinc-950 border border-zinc-800 p-3 mb-4 text-xs text-zinc-500">
+                  <div className="font-bold text-zinc-400 mb-1">Examples of valid URLs:</div>
+                  <div>✓ https://example.com/audio/song.mp3</div>
+                  <div>✓ https://cdn.example.com/music.wav</div>
+                  <div className="mt-2 font-bold text-zinc-400 mb-1">Not supported:</div>
+                  <div>✗ Bandcamp, SoundCloud, YouTube URLs (use download tools first)</div>
+                  <div>✗ Streaming service links</div>
+                </div>
                 <input
                   data-testid="transcribe-song-name-input"
                   type="text"
