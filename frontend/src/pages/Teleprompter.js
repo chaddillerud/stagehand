@@ -39,6 +39,8 @@ export default function Teleprompter() {
   const clockRef = useRef(null);
   const lyricsRef = useRef(null);
   const gamepadRef = useRef(null);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
 
   useEffect(() => {
     loadSetList();
@@ -198,6 +200,37 @@ export default function Teleprompter() {
         setShowControls(false);
       }
     }, 3000);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartX.current || !touchStartY.current) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+    
+    // Only register swipe if horizontal movement is greater than vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      const minSwipeDistance = 50; // minimum pixels for a swipe
+      
+      if (deltaX > minSwipeDistance) {
+        // Swipe right = Previous song
+        previous();
+      } else if (deltaX < -minSwipeDistance) {
+        // Swipe left = Next song
+        next();
+      }
+    }
+    
+    touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   const start = () => {
@@ -376,6 +409,8 @@ export default function Teleprompter() {
     <div 
       className={`h-screen w-full ${styles.bg} ${styles.text} overflow-hidden flex flex-col`}
       onMouseMove={handleMouseMove}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Header - Fixed */}
       <div 
@@ -580,6 +615,17 @@ export default function Teleprompter() {
               <div><kbd className="bg-zinc-800 px-1 rounded">Home</kbd> Start</div>
               <div><kbd className="bg-zinc-800 px-1 rounded">Esc</kbd> Stop</div>
               <div><kbd className="bg-zinc-800 px-1 rounded">S</kbd> Settings</div>
+            </div>
+          </div>
+
+          {/* Touch Gestures */}
+          <div className="mt-4 pt-4 border-t border-zinc-800">
+            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2">
+              Touch Gestures
+            </div>
+            <div className="text-xs text-zinc-400 space-y-1">
+              <div>👈 Swipe Left → Next Song</div>
+              <div>👉 Swipe Right → Previous Song</div>
             </div>
           </div>
         </div>
