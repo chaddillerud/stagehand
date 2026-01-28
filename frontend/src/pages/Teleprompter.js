@@ -44,6 +44,7 @@ export default function Teleprompter() {
   const gamepadRef = useRef(null);
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
+  const autoScrollIntervalRef = useRef(null);
 
   useEffect(() => {
     loadSetList();
@@ -153,7 +154,16 @@ export default function Teleprompter() {
 
   // Auto-scroll effect
   useEffect(() => {
-    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) return;
+    // Clear any existing interval first
+    if (autoScrollIntervalRef.current) {
+      clearInterval(autoScrollIntervalRef.current);
+      autoScrollIntervalRef.current = null;
+    }
+
+    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) {
+      console.log('Auto-scroll: Conditions not met', { autoScrollEnabled, isPlaying, hasSongs: songs.length > 0 });
+      return;
+    }
 
     const currentSong = songs[currentIndex];
     if (!currentSong || !currentSong.duration) {
@@ -185,7 +195,7 @@ export default function Teleprompter() {
       return;
     }
 
-    console.log(`Auto-scroll active: ${totalScrollHeight}px over ${songDurationSeconds}s at ${scrollSpeed}x speed`);
+    console.log(`✅ Auto-scroll STARTING: ${totalScrollHeight}px over ${songDurationSeconds}s at ${scrollSpeed}x speed`);
 
     // Pixels per second adjusted by speed multiplier
     const pixelsPerSecond = (totalScrollHeight / songDurationSeconds) * scrollSpeed;
@@ -194,7 +204,9 @@ export default function Teleprompter() {
     const frameRate = 60;
     const pixelsPerFrame = pixelsPerSecond / frameRate;
 
-    const scrollInterval = setInterval(() => {
+    console.log(`Scroll params: ${pixelsPerFrame.toFixed(3)} px/frame (${pixelsPerSecond.toFixed(2)} px/sec)`);
+
+    autoScrollIntervalRef.current = setInterval(() => {
       if (container.scrollTop < totalScrollHeight) {
         container.scrollTop += pixelsPerFrame;
       } else {
@@ -203,7 +215,11 @@ export default function Teleprompter() {
     }, 1000 / frameRate);
 
     return () => {
-      clearInterval(scrollInterval);
+      if (autoScrollIntervalRef.current) {
+        console.log('Auto-scroll: Cleanup - stopping interval');
+        clearInterval(autoScrollIntervalRef.current);
+        autoScrollIntervalRef.current = null;
+      }
     };
   }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs]);
 
