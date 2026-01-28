@@ -145,7 +145,7 @@ async def delete_song(song_id: str):
     
     return {"message": "Song deleted successfully"}
 
-@api_router.post("/songs/import")
+@api_router.post("/songs/import", status_code=201)
 async def import_song(file: UploadFile = File(...)):
     if not file.filename.endswith('.txt'):
         raise HTTPException(status_code=400, detail="Only .txt files are supported")
