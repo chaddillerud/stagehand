@@ -34,6 +34,7 @@ export default function Teleprompter() {
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(1.0); // 1.0 = 100%, range 0.5 to 2.0
+  const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
   const timerRef = useRef(null);
@@ -437,8 +438,8 @@ export default function Teleprompter() {
       return {
         container: 'flex-col',
         header: 'flex-col gap-4 text-center',
-        lyrics: 'text-3xl md:text-5xl lg:text-7xl',
-        songTitle: 'text-5xl md:text-7xl',
+        lyrics: getFontSizeClass(fontSize, true),
+        songTitle: getSongTitleSizeClass(fontSize, true),
         controls: 'flex-col gap-3',
         songNav: 'flex-col max-h-48 overflow-y-auto',
         mainControls: 'grid grid-cols-2 gap-3 w-full'
@@ -447,12 +448,32 @@ export default function Teleprompter() {
     return {
       container: 'flex-col',
       header: 'flex-row justify-between gap-8',
-      lyrics: 'text-3xl md:text-4xl lg:text-6xl',
-      songTitle: 'text-4xl md:text-6xl lg:text-8xl',
+      lyrics: getFontSizeClass(fontSize, false),
+      songTitle: getSongTitleSizeClass(fontSize, false),
       controls: 'flex-col',
       songNav: 'flex-row overflow-x-auto',
       mainControls: 'flex gap-4'
     };
+  };
+
+  const getFontSizeClass = (size, isPortrait) => {
+    const sizes = {
+      'small': isPortrait ? 'text-2xl md:text-3xl lg:text-4xl' : 'text-xl md:text-2xl lg:text-3xl',
+      'medium': isPortrait ? 'text-3xl md:text-4xl lg:text-5xl' : 'text-2xl md:text-3xl lg:text-4xl',
+      'large': isPortrait ? 'text-3xl md:text-5xl lg:text-7xl' : 'text-3xl md:text-4xl lg:text-6xl',
+      'xlarge': isPortrait ? 'text-5xl md:text-6xl lg:text-8xl' : 'text-4xl md:text-6xl lg:text-8xl'
+    };
+    return sizes[size] || sizes.large;
+  };
+
+  const getSongTitleSizeClass = (size, isPortrait) => {
+    const sizes = {
+      'small': isPortrait ? 'text-3xl md:text-4xl' : 'text-3xl md:text-4xl lg:text-5xl',
+      'medium': isPortrait ? 'text-4xl md:text-5xl' : 'text-4xl md:text-5xl lg:text-6xl',
+      'large': isPortrait ? 'text-5xl md:text-7xl' : 'text-4xl md:text-6xl lg:text-8xl',
+      'xlarge': isPortrait ? 'text-6xl md:text-8xl' : 'text-5xl md:text-7xl lg:text-9xl'
+    };
+    return sizes[size] || sizes.large;
   };
 
   const orientStyles = getOrientationStyles();
@@ -552,7 +573,7 @@ export default function Teleprompter() {
           </div>
 
           {/* Lyrics */}
-          <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap ${styles.text}`}>
+          <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap break-words hyphens-auto`}>
             {currentSong.lyrics || (
               <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
             )}
@@ -724,6 +745,45 @@ export default function Teleprompter() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Font Size Settings */}
+          <div className="mb-4 pt-4 border-t border-zinc-800">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Font Size
+            </label>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: 'small', label: 'Small', sample: 'Aa' },
+                { value: 'medium', label: 'Medium', sample: 'Aa' },
+                { value: 'large', label: 'Large', sample: 'Aa' },
+                { value: 'xlarge', label: 'X-Large', sample: 'Aa' }
+              ].map(size => (
+                <button
+                  key={size.value}
+                  data-testid={`font-size-${size.value}`}
+                  onClick={() => setFontSize(size.value)}
+                  className={`p-3 rounded-none border-2 transition-all ${
+                    fontSize === size.value
+                      ? 'border-yellow-400 bg-yellow-400/10'
+                      : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
+                  }`}
+                >
+                  <div className={`font-bold text-white mb-1 ${
+                    size.value === 'small' ? 'text-sm' : 
+                    size.value === 'medium' ? 'text-base' :
+                    size.value === 'large' ? 'text-lg' : 'text-xl'
+                  }`}>
+                    {size.sample}
+                  </div>
+                  <div className="text-xs text-zinc-500">{size.label}</div>
+                </button>
+              ))}
+            </div>
+            <div className="text-xs text-zinc-500 mt-2 p-2 bg-zinc-950 border border-zinc-800">
+              💡 Adjust for your screen distance and viewing comfort
+            </div>
           </div>
 
           {/* Keyboard Shortcuts */}
