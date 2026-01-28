@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Save, Trash2, Play, Plus, GripVertical, X } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Play, Plus, GripVertical, X, Printer } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -129,6 +129,11 @@ export default function SetListEditor() {
     window.open(url, 'teleprompter', 'width=1200,height=800');
   };
 
+  const openPrintView = () => {
+    const url = `/setlist/${id}/print`;
+    window.open(url, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -171,6 +176,14 @@ export default function SetListEditor() {
             >
               <Save size={20} strokeWidth={2.5} />
               Save Changes
+            </button>
+            <button
+              data-testid="print-setlist-btn"
+              onClick={openPrintView}
+              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+            >
+              <Printer size={20} strokeWidth={1.5} />
+              Print View
             </button>
             <button
               data-testid="open-teleprompter-btn"

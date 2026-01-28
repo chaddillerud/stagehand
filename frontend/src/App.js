@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import SetListEditor from "./pages/SetListEditor";
 import SongEditor from "./pages/SongEditor";
 import Teleprompter from "./pages/Teleprompter";
+import PrintSetlist from "./pages/PrintSetlist";
 import { Toaster } from "sonner";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/setlist/:id" element={<SetListEditor />} />
+          <Route path="/setlist/:id/print" element={<PrintSetlist />} />
           <Route path="/song/:id" element={<SongEditor />} />
           <Route path="/prompter/:setlistId" element={<Teleprompter />} />
         </Routes>
