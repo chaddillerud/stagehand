@@ -33,7 +33,7 @@ export default function Teleprompter() {
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true); // Default ON
-  const [scrollSpeed, setScrollSpeed] = useState(1.0); // 1.0 = 100%, range 0.5 to 2.0
+  const [scrollSpeed, setScrollSpeed] = useState(1.5); // 1.5 = 150% (more visible by default)
   const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
