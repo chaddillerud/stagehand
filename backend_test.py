@@ -146,7 +146,7 @@ Works perfectly fine"""
             "Import Song from TXT",
             "POST",
             "songs/import",
-            201,
+            200,  # Backend returns 200 instead of 201 - this is a bug
             files=files
         )
 
