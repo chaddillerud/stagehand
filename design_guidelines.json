@@ -1,0 +1,142 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "StageHand - The Savage Setlist",
+      "archetype": "Industrial Brutalist / High-Performance",
+      "vibe": "Raw, energetic, reliable, stealthy. Think 'Backstage Pass' meets 'Cyberpunk Terminal'.",
+      "principles": [
+        "Function over Fluff: High contrast for stage visibility.",
+        "Savage Efficiency: Big buttons, clear text, no hiding.",
+        "Industrial Aesthetics: Tape, markers, metal, dark surfaces.",
+        "Stealth Mode: The prompter must be invisible to the audience (dark bg)."
+      ]
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Oswald, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "weights": {
+        "headings": "700 (Bold) or 500 (Medium)",
+        "body": "400 (Regular)",
+        "bold": "700 (Bold)"
+      },
+      "scale": {
+        "h1": "text-5xl md:text-7xl tracking-tighter uppercase",
+        "h2": "text-3xl md:text-5xl tracking-tight uppercase",
+        "h3": "text-xl md:text-2xl font-bold uppercase",
+        "body": "text-base md:text-lg leading-relaxed",
+        "prompter": "text-4xl md:text-6xl lg:text-8xl font-mono leading-tight"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Oswald:wght@400;500;700&display=swap"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "background": "#09090b",
+        "surface": "#18181b",
+        "surface_highlight": "#27272a",
+        "border": "#3f3f46",
+        "primary": "#facc15",
+        "primary_foreground": "#000000",
+        "secondary": "#ffffff",
+        "secondary_foreground": "#000000",
+        "muted": "#71717a",
+        "accent": "#e11d48",
+        "success": "#22c55e",
+        "warning": "#f97316",
+        "error": "#ef4444"
+      },
+      "usage": {
+        "body_bg": "bg-[#09090b]",
+        "card_bg": "bg-[#18181b]",
+        "text_main": "text-zinc-50",
+        "text_muted": "text-zinc-400",
+        "border_default": "border-zinc-800",
+        "primary_cta": "bg-yellow-400 text-black hover:bg-yellow-500",
+        "prompter_bg": "bg-black",
+        "prompter_text": "text-white (or user customizable)"
+      }
+    },
+    "layout": {
+      "spacing": {
+        "container_padding": "p-4 md:p-8 lg:p-12",
+        "section_gap": "gap-8 md:gap-16",
+        "element_gap": "gap-4"
+      },
+      "grid_system": {
+        "dashboard": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+        "setlist_view": "grid grid-cols-1 lg:grid-cols-12 gap-8",
+        "prompter": "flex flex-col h-screen w-full overflow-hidden"
+      },
+      "radius": "rounded-none"
+    },
+    "components": {
+      "buttons": {
+        "primary": "rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-transform active:scale-95 border-2 border-transparent",
+        "secondary": "rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700",
+        "ghost": "rounded-none font-oswald uppercase tracking-wider font-bold text-zinc-400 hover:text-white hover:bg-zinc-900",
+        "destructive": "rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700"
+      },
+      "cards": {
+        "style": "bg-zinc-900 border border-zinc-800 rounded-none p-6 hover:border-yellow-400/50 transition-colors group relative overflow-hidden",
+        "hover_effect": "group-hover:shadow-[4px_4px_0px_0px_rgba(250,204,21,1)] transition-shadow duration-200"
+      },
+      "inputs": {
+        "style": "bg-zinc-950 border-zinc-800 rounded-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 text-white placeholder:text-zinc-600 font-mono"
+      },
+      "prompter": {
+        "container": "bg-black text-white h-full w-full relative",
+        "text": "font-mono font-bold leading-snug whitespace-pre-wrap",
+        "controls": "fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-sm border-t border-zinc-800 p-4 flex justify-center gap-4 z-50"
+      }
+    },
+    "visual_enhancers": {
+      "textures": [
+        "Use a subtle noise texture overlay on the main background: `bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20`",
+        "Use 'Caution Tape' stripes for loading bars or dividers."
+      ],
+      "decorations": [
+        "1px solid borders everywhere. No soft shadows.",
+        "Use 'brackets' [ ] around key metrics.",
+        "Monospace numbers for all data (timers, bpm, duration)."
+      ]
+    },
+    "motion": {
+      "hover": "transition-all duration-200 ease-out",
+      "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-500",
+      "prompter_scroll": "smooth linear scrolling (must be implemented with JS for variable speed)"
+    },
+    "assets": {
+      "images": {
+        "hero_bg": "https://images.unsplash.com/photo-1558342706-2140d4e3c357?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHMlMjBkYXJrfGVufDB8fHx8MTc2OTU3NTEzNHww&ixlib=rb-4.1.0&q=85",
+        "feature_guitar": "https://images.unsplash.com/photo-1764120966038-b3ff77d82af4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwxfHxtdXNpY2lhbiUyMHBlcmZvcm1pbmclMjBsaXZlJTIwY2xvc2UlMjB1cHxlbnwwfHx8fDE3Njk1NzUxMzV8MA&ixlib=rb-4.1.0&q=85",
+        "stage_mic": "https://images.unsplash.com/photo-1721623777765-1381ba32859c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHMlMjBkYXJrfGVufDB8fHx8MTc2OTU3NTEzNHww&ixlib=rb-4.1.0&q=85"
+      },
+      "icons": "Use `lucide-react` with `stroke-width={1.5}` for a technical look."
+    },
+    "instructions_to_main_agent": [
+      "1. SETUP: Install fonts (Oswald, JetBrains Mono) in index.css immediately.",
+      "2. THEME: Force DARK MODE by default. The app is for dark stages. Do not build a light mode unless explicitly requested for the editor only.",
+      "3. LAYOUT: Use the 'Bento' grid for the Setlist Dashboard. Make items look like 'gear' or 'pedals'.",
+      "4. PROMPTER: The Teleprompter view MUST be a separate route (e.g., `/prompter/:id`) that can be opened in a new window. It must have ZERO distractions. Just text and a hidden control bar.",
+      "5. FORMS: Use Shadcn forms but strip the rounded corners. Make them look like industrial inputs.",
+      "6. SAVAGE MODE: Add a 'Savage Mode' toggle that turns the UI red/black for extreme visibility.",
+      "7. IMPORT: The .txt import should parse 'Title - Artist' or standard chord pro formats."
+    ],
+    "universal_guidelines": {
+      "do_not": [
+        "Do not use gradients for backgrounds. Use solid dark colors + noise.",
+        "Do not use rounded buttons (pill shape). Use sharp rectangles.",
+        "Do not use serif fonts."
+      ],
+      "must_do": [
+        "Use `data-testid` for all interactive elements.",
+        "Ensure high contrast (WCAG AA) for all text.",
+        "Make the 'Scroll Speed' control in the prompter huge and easy to grab."
+      ]
+    }
+  }
+}
