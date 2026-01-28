@@ -78,7 +78,7 @@ class SetListUpdate(BaseModel):
 
 
 # Song Routes
-@api_router.post("/songs", response_model=Song)
+@api_router.post("/songs", response_model=Song, status_code=201)
 async def create_song(input: SongCreate):
     song_dict = input.model_dump()
     song_obj = Song(**song_dict)
