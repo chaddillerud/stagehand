@@ -175,7 +175,7 @@ async def import_song(file: UploadFile = File(...)):
 
 
 # SetList Routes
-@api_router.post("/setlists", response_model=SetList)
+@api_router.post("/setlists", response_model=SetList, status_code=201)
 async def create_setlist(input: SetListCreate):
     setlist_dict = input.model_dump()
     setlist_obj = SetList(**setlist_dict)
