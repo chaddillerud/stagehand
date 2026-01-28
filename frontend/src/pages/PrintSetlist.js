@@ -114,20 +114,22 @@ export default function PrintSetlist() {
         .header {
           text-align: center;
           margin-bottom: 30px;
-          border-bottom: 3px solid #000;
+          border-bottom: 4px solid #000;
           padding-bottom: 20px;
         }
         
         .header h1 {
-          font-size: 32px;
-          font-weight: bold;
+          font-size: 36px;
+          font-weight: 900;
           margin: 0 0 10px 0;
           text-transform: uppercase;
+          color: #000;
         }
         
         .header .meta {
-          font-size: 14px;
-          color: #666;
+          font-size: 16px;
+          color: #333;
+          font-weight: 600;
         }
         
         table {
@@ -137,41 +139,47 @@ export default function PrintSetlist() {
         }
         
         th {
-          background: #f0f0f0;
+          background: #000;
+          color: #fff;
           font-weight: bold;
           text-align: left;
-          padding: 10px;
-          border: 1px solid #ddd;
-          font-size: 12px;
+          padding: 12px;
+          border: 2px solid #000;
+          font-size: 13px;
           text-transform: uppercase;
         }
         
         td {
-          padding: 10px;
-          border: 1px solid #ddd;
-          font-size: 14px;
+          padding: 12px;
+          border: 2px solid #333;
+          font-size: 16px;
+          font-weight: 500;
+          color: #000;
         }
         
         tr:nth-child(even) {
-          background: #f9f9f9;
+          background: #f5f5f5;
         }
         
         .song-number {
           font-weight: bold;
           text-align: center;
+          font-size: 18px;
         }
         
         .song-name {
-          font-weight: bold;
+          font-weight: 700;
+          font-size: 17px;
         }
         
         .footer {
           margin-top: 30px;
           padding-top: 20px;
-          border-top: 2px solid #ddd;
+          border-top: 3px solid #333;
           text-align: center;
-          font-size: 12px;
-          color: #666;
+          font-size: 13px;
+          color: #333;
+          font-weight: 600;
         }
         
         .print-button {
