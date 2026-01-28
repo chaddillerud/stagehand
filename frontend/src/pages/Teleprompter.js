@@ -8,7 +8,8 @@ import {
   SkipForward, 
   Square,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  GripVertical
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -135,6 +136,39 @@ export default function Teleprompter() {
     setCurrentIndex(index);
   };
 
+  const handleSongDragStart = (e, index) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', index);
+  };
+
+  const handleSongDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleSongDrop = (e, dropIndex) => {
+    e.preventDefault();
+    const dragIndex = parseInt(e.dataTransfer.getData('text/html'));
+    
+    if (dragIndex === dropIndex) return;
+    
+    const newSongs = [...songs];
+    const draggedSong = newSongs[dragIndex];
+    newSongs.splice(dragIndex, 1);
+    newSongs.splice(dropIndex, 0, draggedSong);
+    
+    // Adjust current index if needed
+    if (currentIndex === dragIndex) {
+      setCurrentIndex(dropIndex);
+    } else if (dragIndex < currentIndex && dropIndex >= currentIndex) {
+      setCurrentIndex(currentIndex - 1);
+    } else if (dragIndex > currentIndex && dropIndex <= currentIndex) {
+      setCurrentIndex(currentIndex + 1);
+    }
+    
+    setSongs(newSongs);
+  };
+
   const formatTime = (seconds) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -247,21 +281,33 @@ export default function Teleprompter() {
       >
         <div className="max-w-4xl mx-auto">
           {/* Song Navigation */}
-          <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
-            {songs.map((song, index) => (
-              <button
-                key={song.id}
-                data-testid={`skip-to-song-${index}`}
-                onClick={() => skipTo(index)}
-                className={`flex-shrink-0 px-4 py-2 rounded-none font-oswald uppercase text-xs border-2 transition-all ${
-                  index === currentIndex
-                    ? 'bg-yellow-400 text-black border-yellow-400'
-                    : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600'
-                }`}
-              >
-                {index + 1}. {song.name}
-              </button>
-            ))}
+          <div className="mb-4">
+            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2 text-center">
+              Song Order (Drag to Reorder)
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {songs.map((song, index) => (
+                <button
+                  key={song.id}
+                  data-testid={`skip-to-song-${index}`}
+                  draggable
+                  onDragStart={(e) => handleSongDragStart(e, index)}
+                  onDragOver={handleSongDragOver}
+                  onDrop={(e) => handleSongDrop(e, index)}
+                  onClick={() => skipTo(index)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-none font-oswald uppercase text-xs border-2 transition-all cursor-move ${
+                    index === currentIndex
+                      ? 'bg-yellow-400 text-black border-yellow-400'
+                      : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <GripVertical size={12} strokeWidth={1.5} />
+                    <span>{index + 1}. {song.name}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Main Controls */}
