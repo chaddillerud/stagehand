@@ -152,7 +152,7 @@ export default function Teleprompter() {
     };
   }, [isPlaying]);
 
-  // Auto-scroll effect
+  // Auto-scroll effect - FIXED: proper dependency handling and simpler calculation
   useEffect(() => {
     // Clear any existing interval first
     if (autoScrollIntervalRef.current) {
@@ -160,34 +160,19 @@ export default function Teleprompter() {
       autoScrollIntervalRef.current = null;
     }
 
-    if (!autoScrollEnabled) {
-      console.log('Auto-scroll: Disabled');
-      return;
-    }
-
-    if (!isPlaying) {
-      console.log('Auto-scroll: Not playing');
-      return;
-    }
-
-    if (!lyricsRef.current) {
-      console.log('Auto-scroll: No lyrics ref');
-      return;
-    }
-
-    if (songs.length === 0) {
-      console.log('Auto-scroll: No songs');
+    // Early exit conditions
+    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) {
       return;
     }
 
     const currentSong = songs[currentIndex];
-    if (!currentSong || !currentSong.duration) {
-      console.log('Auto-scroll: No duration set for current song');
+    if (!currentSong) {
       return;
     }
 
-    // Parse duration (MM:SS format)
+    // Parse duration (MM:SS format) - returns seconds
     const parseDuration = (durationStr) => {
+      if (!durationStr) return 0;
       const parts = durationStr.split(':');
       if (parts.length === 2) {
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
@@ -196,63 +181,51 @@ export default function Teleprompter() {
     };
 
     const songDurationSeconds = parseDuration(currentSong.duration);
-    if (songDurationSeconds === 0) {
-      console.log('Auto-scroll: Invalid duration format');
-      return;
-    }
-
+    
     // Calculate scroll parameters
     const container = lyricsRef.current;
     const totalScrollHeight = container.scrollHeight - container.clientHeight;
     
     if (totalScrollHeight <= 0) {
-      console.log('Auto-scroll: No scrollable content');
-      return;
+      return; // Nothing to scroll
     }
 
-    // Base calculation with AGGRESSIVE multiplier to make it actually visible
-    // Without this, the scroll is imperceptibly slow
-    const basePixelsPerSecond = (totalScrollHeight / songDurationSeconds) * 3.0; // 3x baseline
+    // Calculate pixels per second
+    // If song has duration, use that. Otherwise, use a sensible default (60 seconds)
+    const effectiveDuration = songDurationSeconds > 0 ? songDurationSeconds : 60;
     
-    // Apply tempo adjustment if available (subtle adjustment only)
-    let pixelsPerSecond = basePixelsPerSecond;
-    if (currentSong.tempo) {
-      const bpm = parseInt(currentSong.tempo);
-      if (!isNaN(bpm) && bpm > 0 && bpm < 300) {
-        // Subtle tempo adjustment: 80 BPM = 0.9x, 120 BPM = 1.0x, 160 BPM = 1.1x
-        const tempoMultiplier = 0.8 + (bpm / 400);
-        pixelsPerSecond *= tempoMultiplier;
-        console.log(`Tempo: ${bpm} BPM = ${tempoMultiplier.toFixed(2)}x`);
-      }
-    }
+    // Base: scroll the entire content over the song duration
+    // At 100% speed (scrollSpeed=1.0), complete scroll = song duration
+    let pixelsPerSecond = totalScrollHeight / effectiveDuration;
     
-    // Apply user speed adjustment
+    // Apply user speed multiplier (slider is 0.5 to 3.0)
     pixelsPerSecond *= scrollSpeed;
-    
+
+    // Frame-based scrolling for smooth animation
     const frameRate = 60;
     const pixelsPerFrame = pixelsPerSecond / frameRate;
 
-    console.log(`✅ AUTO-SCROLL: ${pixelsPerFrame.toFixed(2)}px/frame = ${pixelsPerSecond.toFixed(1)}px/sec`);
+    console.log(`🎵 AUTO-SCROLL: Song "${currentSong.name}" | Duration: ${effectiveDuration}s | Speed: ${Math.round(scrollSpeed * 100)}% | ${pixelsPerSecond.toFixed(1)}px/sec`);
 
-    // Start scrolling - use ref directly to avoid closure issues
+    // Start the scroll interval
     autoScrollIntervalRef.current = setInterval(() => {
-      if (!lyricsRef.current) return;
+      const el = lyricsRef.current;
+      if (!el) return;
       
-      const maxScroll = lyricsRef.current.scrollHeight - lyricsRef.current.clientHeight;
-      if (lyricsRef.current.scrollTop < maxScroll) {
-        lyricsRef.current.scrollTop += pixelsPerFrame;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (el.scrollTop < maxScroll) {
+        el.scrollTop += pixelsPerFrame;
       }
     }, 1000 / frameRate);
 
-    // Cleanup function
+    // Cleanup
     return () => {
       if (autoScrollIntervalRef.current) {
-        console.log('Auto-scroll: Cleanup');
         clearInterval(autoScrollIntervalRef.current);
         autoScrollIntervalRef.current = null;
       }
     };
-  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed]);
+  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs]);
 
   useEffect(() => {
     // Calculate total time for set list
