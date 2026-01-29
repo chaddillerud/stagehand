@@ -264,7 +264,8 @@ async def create_song_from_audio(file: UploadFile = File(...)):
     await db.songs.insert_one(song_doc)
     
     # Return without _id
-    del song_doc["_id"] if "_id" in song_doc else None
+    if "_id" in song_doc:
+        del song_doc["_id"]
     
     return song_doc
 
