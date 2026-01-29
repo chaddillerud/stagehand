@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class SetListAPITester:
-    def __init__(self, base_url="https://lyric-teleprompter.preview.emergentagent.com"):
+    def __init__(self, base_url="https://gignotes.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0

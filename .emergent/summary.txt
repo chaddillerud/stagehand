@@ -19,174 +19,423 @@
 - Add font size controls to the teleprompter.
 - A print-friendly view for setlists.
 - A backup and restore functionality for all songs and setlists.
-- A field to add a URL to a song for practice (e.g., YouTube, Spotify link).
+- A field to add a URL to a song for practice (e.g., YouTube, Spotify link) - **(Superseded by audio upload)**.
+- Implement automatic pauses for instrumental sections in the teleprompter.
+- Allow editing lyrics directly from the teleprompter.
+- Persist scroll settings (speed, auto-scroll) for each song.
+- Implement a click track with count-in options.
+- Create songs directly from an audio file upload, auto-transcribing lyrics and extracting duration.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a React frontend, FastAPI backend, and MongoDB database. The application, named StageHand, allows users to create, manage, and edit songs and setlists. It features a sophisticated teleprompter with multiple control methods (keyboard, foot pedal, touch gestures), display modes, font sizing, and orientation settings. It also includes advanced features like audio transcription via OpenAI Whisper, a lyric formatting tool, and backup/restore capabilities.
+A full-stack application named StageHand with a React frontend, FastAPI backend, and MongoDB database. It allows users to manage songs and setlists. The core feature is a sophisticated teleprompter with auto-scroll, practice mode (with audio playback), a click track, automatic pause markers for solos (), on-the-fly lyric editing, and persistent per-song scroll settings. The app has workflows to create songs from text files or directly from audio uploads, which should auto-transcribe lyrics and extract duration. The agent was in the process of a major UI/UX overhaul to improve the app's commercial appeal.
 
 **Last working item**:
--   **Last item agent was working**: The agent was working on two things simultaneously:
-    1.  Fixing the **auto-scroll** feature, which has been a persistent and frustrating bug for the user.
-    2.  Implementing a new feature request to add a **Song Link** field to each song, allowing users to link to an online version for practice.
-    The agent applied a new, more aggressive calculation for auto-scroll and added the necessary backend and frontend code for the song link feature.
+-   **Last item agent was working**: The agent was implementing a list of Quick Wins to improve the app's commercial quality and professional feel, as requested by the user. This involved a significant refactor of the Dashboard. The agent updated the app's color palette in  and was in the middle of rewriting  to add a logo, a search bar, a Duplicate Song/Setlist feature, and improve the overall button hierarchy and layout.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: both
+-   **Which testing method agent to use?**: frontend testing agent
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   Issue 1: (P0) Auto-scroll is not working correctly.
+-   Issue 1: (P0) Audio transcription fails when creating or updating a song.
 -   Issue 2: (P1) Lyric Formatter's Chords Inline mode has a visual bug.
--   Issue 3: (P2) Deleting songs was reported as not working, but the agent's test passed.
+-   Issue 3: (P2) Deleting songs was reported as not working, but an agent test passed.
 
 **Issues Detail**:
--   **Issue 1**: Auto-scroll is not working correctly
-    -   **Attempted fixes**: The agent has tried multiple approaches: duration-based scrolling, tempo-based scrolling, increasing default speeds, and debugging React  dependencies and closure issues. The feature remains unreliable, either not scrolling at all or only at unusably high speeds.
+-   **Issue 1**: Audio transcription fails when creating or updating a song
+    -   **Attempted fixes**: This is a highly recurring issue. The agent tried multiple fixes: adding the missing  to the  constructor, correcting the method call from  to , and changing the code to pass a file object instead of a string path to the  method. Despite these fixes, the user confirmed transcription is still not working (No. Nothing transcribing. did we fuck it up?).
     -   **Next debug checklist**:
-        1.  Restart services and ensure the latest code for auto-scroll and the new song link feature is running.
-        2.  Create a test setlist containing songs that have valid  and  values.
-        3.  Open the teleprompter for this setlist and start the performance timer.
-        4.  Check the browser console for logs and the UI to see if scrolling occurs at a reasonable default speed.
-        5.  Test the speed slider to confirm it adjusts the scroll speed as expected.
-        6.  Review the  logic in  for flaws.
-    -   **Why fix this issue and what will be achieved with the fix?**: This is a core teleprompter feature and the most significant source of user frustration. Fixing it is critical for the app's usability.
+        1.  In the Dashboard, use the FROM AUDIO button to upload a small, clean MP3 file.
+        2.  Check the backend logs (==> /var/log/supervisor/backend.err.log <==
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [9308]
+INFO:     Stopping reloader process [9150]
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [9361] using WatchFiles
+INFO:     Started server process [9363]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+2026-01-29 03:08:16,733 - server - WARNING - Could not transcribe audio: Failed to transcribe audio: litellm.APIConnectionError: APIConnectionError: OpenAIException - Expected entry at `file` to be bytes, an io.IOBase instance, PathLike or a tuple but received <class 'str'> instead. See https://github.com/openai/openai-python/tree/main#file-uploads
+WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [9363]
+INFO:     Started server process [9485]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [9485]
+INFO:     Started server process [9519]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [9519]
+INFO:     Stopping reloader process [9361]
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [9542] using WatchFiles
+INFO:     Started server process [9544]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+2026-01-29 03:10:36,575 - server - INFO - Transcribed audio for new song 9fad29e6-e8f3-4f5b-b2a7-2c7b653ced31
+2026-01-29 03:14:46,424 - server - INFO - Transcribed audio for new song ec301cf3-6458-416f-881c-65b963d9027a
+2026-01-29 03:20:39,312 - server - INFO - Transcribed audio for song 1a75787b-af1c-4067-8589-7c92ece3f6d9
+2026-01-29 03:24:48,651 - server - INFO - Transcribed audio for song ba4c66dc-73c0-43e0-ab89-8e89214afd69
+2026-01-29 03:25:30,379 - server - INFO - Transcribed audio for song ba4c66dc-73c0-43e0-ab89-8e89214afd69
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [42] using WatchFiles
+INFO:     Started server process [90]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [42] using WatchFiles
+INFO:     Started server process [86]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [48] using WatchFiles
+INFO:     Started server process [72]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72]
+INFO:     Started server process [791]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [791]
+INFO:     Stopping reloader process [48]
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [1202] using WatchFiles
+INFO:     Started server process [1204]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [48] using WatchFiles
+INFO:     Started server process [79]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [42] using WatchFiles
+INFO:     Started server process [90]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [48] using WatchFiles
+INFO:     Started server process [66]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+
+==> /var/log/supervisor/backend.out.log <==
+INFO:     10.64.129.13:56224 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.135.173:39494 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.135.173:57038 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.245:55506 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.136.245:55506 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48378 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48378 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.7:52120 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48378 - "PUT /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48378 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.136.245:55506 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.135.173:54824 - "GET /api/audio/1efc0d17-7e4f-4ba2-9e0c-046c56340935_e7a24f9c.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.135.173:54824 - "GET /api/audio/956b43dc-f62f-4c25-90f6-8aefb611a5a9_076541a4.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.136.226:37612 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.136.245:48500 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.7:53542 - "GET /api/audio/1a75787b-af1c-4067-8589-7c92ece3f6d9_e3637620.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.129.9:53254 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.13:45596 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.7:53542 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:36406 - "GET /api/audio/1de393bc-db47-4e2a-ad42-e1607af31d2e_0ade0f35.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.136.226:37612 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.226:37612 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.13:60986 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.245:50932 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.7:55178 - "GET /api/audio/846aa9ca-e92e-4b7e-b326-db8d3ef4e540_818dcdc4.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.136.226:39600 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.7:55178 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.9:44848 - "GET /api/audio/1de393bc-db47-4e2a-ad42-e1607af31d2e_0ade0f35.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.129.9:44858 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.226:53976 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.203:39040 - "GET /api/audio/846aa9ca-e92e-4b7e-b326-db8d3ef4e540_818dcdc4.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.129.7:43870 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.245:58488 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.136.245:58488 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.204:43542 - "PUT /api/songs/1efc0d17-7e4f-4ba2-9e0c-046c56340935 HTTP/1.1" 200 OK
+INFO:     10.64.129.7:37516 - "PUT /api/songs/1efc0d17-7e4f-4ba2-9e0c-046c56340935 HTTP/1.1" 200 OK
+INFO:     10.64.131.204:60668 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:49602 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.202:41960 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.136.245:54204 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.226:42822 - "GET /api/audio/de25da11-4e23-4dd4-88aa-a262fc96cbf4_65c252d5.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.131.206:54900 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.204:33640 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.202:48050 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.205:55242 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.204:33640 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.206:54900 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.202:38448 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.202:38452 - "GET /api/audio/0273bc76-180a-4464-83a4-17ce24431c00_55bee047.mp3 HTTP/1.1" 200 OK
+INFO:     10.64.131.202:38448 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.203:34652 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.204:37096 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.203:46194 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.202:54404 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.205:40226 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.206:37894 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.202:45292 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:60684 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.245:44132 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.9:45858 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.135.173:36244 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:37386 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.206:43208 - "PUT /api/songs/fdaf6e7c-7837-4f87-9cef-6447bc3a6f48 HTTP/1.1" 200 OK
+INFO:     10.64.131.34:42600 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.138.62:49524 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:53614 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.7:53614 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.138.62:43304 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.34:50790 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.138.62:43304 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:58884 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.205:51628 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.138.62:43000 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.7:49294 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.131.34:55320 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.138.62:32994 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.138.62:32994 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.202:35536 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.13:56196 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.204:45120 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.205:48752 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.10:55540 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.135.173:55124 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.136.226:49182 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.9:33452 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.13:51976 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.7:56890 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.9:58684 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.129.9:58700 - "GET /api/setlists HTTP/1.1" 200 OK
+INFO:     10.64.129.10:53216 - "GET /api/songs/64b4f1d3-5fa2-4e46-9f13-616aa14450bd HTTP/1.1" 200 OK
+INFO:     10.64.135.173:38522 - "GET /api/songs/64b4f1d3-5fa2-4e46-9f13-616aa14450bd HTTP/1.1" 200 OK
+INFO:     10.64.129.10:53216 - "GET /api/audio/64b4f1d3-5fa2-4e46-9f13-616aa14450bd_41efdda1.wav HTTP/1.1" 200 OK
+INFO:     10.64.129.9:41312 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:60350 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.135.173:45616 - "GET /api/setlists/619fefe0-b0b5-4e00-ad02-7c98c8b0cd54 HTTP/1.1" 200 OK
+INFO:     10.64.129.13:44668 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.203:34392 - "GET /api/songs/eb7fd6a5-d784-45d8-95f4-5b0a532fe308 HTTP/1.1" 200 OK
+INFO:     10.64.129.7:48202 - "GET /api/songs/eb7fd6a5-d784-45d8-95f4-5b0a532fe308 HTTP/1.1" 200 OK
+INFO:     10.64.131.7:49360 - "GET /api/songs HTTP/1.1" 200 OK
+INFO:     10.64.131.7:49376 - "GET /api/setlists HTTP/1.1" 200 OK) immediately for errors related to OpenAI, , or file handling. The last known error was related to the usage: openai [-h] [-v] [-b API_BASE] [-k API_KEY] [-p PROXY [PROXY ...]]
+              [-o ORGANIZATION] [-t {openai,azure}]
+              [--api-version API_VERSION] [--azure-endpoint AZURE_ENDPOINT]
+              [--azure-ad-token AZURE_AD_TOKEN] [-V]
+              {api,tools,migrate,grit} ...
+
+positional arguments:
+  {api,tools,migrate,grit}
+    api                 Direct API calls
+    tools               Client side tools for convenience
+
+options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Set verbosity.
+  -b API_BASE, --api-base API_BASE
+                        What API base url to use.
+  -k API_KEY, --api-key API_KEY
+                        What API key to use.
+  -p PROXY [PROXY ...], --proxy PROXY [PROXY ...]
+                        What proxy to use.
+  -o ORGANIZATION, --organization ORGANIZATION
+                        Which organization to run as (will use your default
+                        organization if not specified)
+  -t {openai,azure}, --api-type {openai,azure}
+                        The backend API to call, must be `openai` or `azure`
+  --api-version API_VERSION
+                        The Azure API version, e.g.
+                        'https://learn.microsoft.com/en-us/azure/ai-
+                        services/openai/reference#rest-api-versioning'
+  --azure-endpoint AZURE_ENDPOINT
+                        The Azure endpoint, e.g.
+                        'https://endpoint.openai.azure.com'
+  --azure-ad-token AZURE_AD_TOKEN
+                        A token from Azure Active Directory,
+                        https://www.microsoft.com/en-
+                        us/security/business/identity-access/microsoft-entra-
+                        id
+  -V, --version         show program's version number and exit library expecting a file object.
+        3.  Verify the exact payload being sent to the  method.
+        4.  Review the logic in the  and  endpoints in  again.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a critical workflow that the user specifically requested and refined. Fixing it is essential for the app's core functionality and user satisfaction.
     -   **Status**: IN PROGRESS
     -   **Is recurring issue?**: Y
-    -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Should Test frontend/backend/both after fix?**: Both
     -   **Blocked on other issue**: None
 -   **Issue 2**: Lyric Formatter's Chords Inline mode has a visual bug
-    -   **Attempted fixes**: None. This was observed during a fix for a different bug in the same component.
+    -   **Attempted fixes**: None.
     -   **Next debug checklist**:
         1.  In the Song Editor, use the FORMAT LYRICS tool on a song with chords.
-        2.  Select the Chords Inline option and observe the After preview.
-        3.  Confirm if the chords are placed on a new line instead of inline with the text (e.g., ).
-        4.  Debug the formatting logic in .
-    -   **Why fix this issue and what will be achieved with the fix?**: Ensures all options in the lyric formatter work as advertised, providing a complete and bug-free feature.
+        2.  Select the Chords Inline option and check if the chords are placed on a new line instead of inline.
+        3.  Debug the formatting logic in .
+    -   **Why fix this issue and what will be achieved with the fix?**: Ensures all formatting options work as advertised.
     -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: Frontend
     -   **Blocked on other issue**: None
--   **Issue 3**: Deleting songs was reported as not working, but the agent's test passed
-    -   **Attempted fixes**: The agent tested the backend endpoint via  and the frontend UI via screenshot, both of which succeeded. The issue might have been temporary or a misunderstanding.
-    -   **Next debug checklist**: This can be marked as resolved unless the user reports it again. If it recurs, a dedicated frontend test case should be created.
-    -   **Why fix this issue and what will be achieved with the fix?**: Ensures core CRUD functionality is reliable.
+-   **Issue 3**: Deleting songs was reported as not working, but an agent test passed
+    -   **Attempted fixes**: Agent tested via  and screenshot, both succeeded.
+    -   **Next debug checklist**: Can be marked as resolved unless reported again.
     -   **Status**: USER VERIFICATION PENDING
-    -   **Is recurring issue?**: Y
+    -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: Frontend
     -   **Blocked on other issue**: None
 
 **In progress Task List**:
--   Task 1: (P0) Add Song Link for Practice
+-   Task 1: (P0) Complete the Quick Wins UI/UX overhaul.
 
 **Task Detail**:
--   **Task 1**: Add Song Link for Practice
-    -   **Where to resume**: The agent has already added the  field to the database, API, and all relevant frontend components (, , ). The task is ready for end-to-end testing.
-    -   **What will be achieved with this?**: Users will be able to store a URL for each song and open it from the setlist view, making it easy to practice along with a recording.
+-   **Task 1**: Complete the Quick Wins UI/UX overhaul
+    -   **Where to resume**: The agent was halfway through refactoring . It needs to:
+        1.  Finish rewriting the JSX for the song and setlist lists to use the new color scheme, incorporate the new search functionality, and add Duplicate buttons.
+        2.  Implement the Keyboard Shortcut Help modal, which should be triggered by pressing the  key.
+        3.  Add the new logo to the header of all main pages (, , , ).
+    -   **What will be achieved with this?**: A more professional, polished, and user-friendly application interface, directly addressing user feedback.
     -   **Status**: IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Should Test frontend/backend/both after fix?**: Frontend
     -   **Blocked on something**: None
 
-**Upcoming and Future Tasks**:
+**Upcoming and Future Tasks**
 -   **Upcoming Tasks**:
-    -   (P0) Finalize and test the **Song Link** feature.
--   **Future Tasks**:
-    -   (P1) **MIDI control integration**: A design proposal exists, but implementation was deferred by the user.
     -   (P1) **Stage Notes Between Songs**: Display transition notes between songs in the teleprompter.
-    -   (P2) **Song Tags/Filters**: Allow users to tag songs and filter the song library.
-    -   (P3) **Timestamp-Based Auto-Scroll**: A more advanced auto-scroll mode that syncs with LRC-style timestamps in the lyrics.
+    -   (P1) **Time Signature Support**: Add support for different time signatures (e.g., 3/4, 6/8) for the click track.
+-   **Future Tasks**:
+    -   (P1) **MIDI control integration**: A design proposal exists, but implementation was deferred.
+    -   (P2) **Song Tags/Filters**: Allow users to tag songs and filter the song library more extensively.
+    -   (P3) **Timestamp-Based Auto-Scroll**: A more advanced auto-scroll mode that syncs with LRC-style timestamps.
+    -   (P3) **Folder organization** for songs.
+    -   (P3) **Setlist Templates**.
 
 **Completed work in this session**
--   **Setlist/Song Management**: Implemented drag-and-drop song reordering, double-click-to-edit, and total set time display.
--   **Teleprompter Features**: Added a real-time clock, multiple control methods (foot pedal, keyboard, swipe), display themes, orientation toggle, font size controls, and a scrollable settings panel.
--   **Audio & Lyrics**: Integrated an audio transcription feature (OpenAI Whisper) and built a lyric formatter tool to standardize chords and spacing.
--   **General App Features**: Created a print-friendly view for setlists and a full backup/restore system.
--   **UI/UX**: Refined the UI by making secondary action buttons more discrete and icon-only, improving the overall visual focus.
+-   **Auto-Scroll Fixed**: Resolved a long-standing bug using  for smooth, reliable scrolling.
+-   **Practice Mode**: Implemented audio playback in the teleprompter via direct MP3/WAV uploads.
+-   **Click Track**: Added a Web Audio API metronome with classic click sound and 4/8 beat count-in options.
+-   **Consolidated Audio Workflow**: Streamlined the process so a single audio upload can (optionally) transcribe lyrics and automatically extracts the song's duration.
+-   **On-the-fly Editing**: Users can now edit lyrics directly from the teleprompter view.
+-   **Persistent Scroll Settings**: Per-song scroll speed and auto-scroll preferences are now saved to the database.
+-   **Automatic Pause Markers**: The teleprompter now recognizes  markers (e.g., ) to pause scrolling for a calculated duration based on the song's BPM.
+-   **UI/UX Improvements**: Moved key controls (scroll speed, practice mode) to a quick-access bar in the teleprompter and highlighted pause markers for better visibility.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1**: Lyric Formatter Chords Inline mode bug
-    -   **Debug checklist**: Check the  function in . The logic for  is likely placing the chord on a new line instead of immediately before the associated word.
-    -   **Why to solve this issue and what will be achieved with this?**: One of the four formatting options is buggy. Fixing it completes the feature and removes the inconsistency.
-    -   **Should Test frontend/backend/both after fix**: Frontend
-    -   **Is recurring issue?**: N
+-   **Issue 1**: Audio transcription workflow is broken.
+    -   **Debug checklist**: See Issue 1 in the **All Pending/In progress Issue list** section.
+    -   **Why to solve this issue and what will be achieved with this?**: This is a critical user-requested feature that is currently failing and causing frustration.
+    -   **Should Test frontend/backend/both after fix**: Both
+    -   **Is recurring issue?**: Y
 
 **Known issue recurrence from previous fork**
--   N/A
+-   The auto-scroll bug was a major recurring issue that is now resolved.
+-   The new recurring issue in this session is the **audio transcription failure**.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend**: React, React Router, Tailwind CSS, Shadcn UI, .
--   **Backend**: FastAPI, Motor (async MongoDB driver).
+-   **Frontend**: React, React Router, Tailwind CSS, Shadcn UI, , Web Audio API.
+-   **Backend**: FastAPI, Motor (async MongoDB driver),  for audio metadata.
 -   **Database**: MongoDB.
 -   **Integrations**: OpenAI Whisper via .
+-   **Core Logic**:  for smooth scrolling, time-based accumulators.
 
 **key DB schema**
 -   **songs**: 
 -   **setlists**: 
 
 **changes in tech stack**
--   None
+-   Added  library to the backend for extracting audio file metadata.
 
 **All files of reference**
--   : Contains all API endpoints, database models, and business logic.
--   : The core of the teleprompter feature; contains complex state and effect logic.
--   : The main entry point for users, displaying song and setlist lists.
--   : UI for managing songs within a setlist.
--   : Form for creating and editing individual songs.
--   : Component for standardizing lyric and chord formatting.
--   : Component for the printer-friendly setlist view.
+-   : Contains all API endpoints, including the new audio upload/transcription logic.
+-   : The most complex component; contains logic for auto-scroll, pause markers, click track, practice mode, and live editing.
+-   : Main landing page, currently undergoing a major UI refactor.
+-   : Form for creating/editing songs, handles audio upload and transcription confirmation.
+-   : Contains the new, refined color palette.
 
 **Areas that need refactoring**:
--    has grown very large and complex. The state management and numerous  hooks are becoming difficult to maintain and debug. It should be refactored into smaller, more focused custom hooks (e.g., , ).
+-   : This component has become extremely large and complex with the addition of numerous features. It should be broken down into smaller components and custom hooks (e.g., , , , ).
+-   : As part of the ongoing refactor, consider breaking out the song list, setlist list, and modals into separate, more manageable components.
 
 **key api endpoints**
--   : CRUD operations for songs.
--   : CRUD operations for setlists.
--   : Handles audio transcription requests.
--   : Exports all database content.
--   : Imports data from a backup file.
+-   : CRUD for songs.
+-   : (POST) Creates a new song from an uploaded audio file, including transcription and duration extraction.
+-   : (POST) Attaches a practice track to an existing song, with optional transcription.
+-   : CRUD for setlists.
+-    / : Database backup and restore functionality.
 
 **Critical Info for New Agent**
--   The user is extremely frustrated with the **auto-scroll** feature. This is the highest priority issue to resolve. Previous attempts have failed, so a careful, step-by-step debugging approach is required. Do not assume previous logic was correct.
--   The user prefers a clean and discrete UI, favoring icon-only buttons for secondary actions. Keep this design principle in mind for any new UI elements.
--   MIDI integration has been discussed but explicitly postponed by the user. Do not work on this unless the user brings it up again.
--   The agent's last action was to implement code for both the auto-scroll fix and the new song link feature. These changes have not been tested. The first step should be to test them thoroughly.
+-   Your **highest priority (P0)** is to fix the **audio transcription bug**. The user has reported it multiple times, and several attempted fixes have failed. Investigate the backend logs immediately after an upload attempt to find the root cause. Do not get distracted by other tasks until this is resolved.
+-   You must complete the Quick Wins UI overhaul for the Dashboard. The agent was in the middle of editing . Refer to the  for what remains to be done.
+-   The user is now focused on commercial quality and polish. Keep this in mind for all future work. Prioritize clean UI, intuitive workflows, and a professional feel over simply adding more features.
 
 **documents and test reports created in this job**
 -   
 -   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  : User is frustrated with auto-scroll. (IN PROGRESS)
-2.  : User reports auto-scroll speed is wrong after a fix. (IN PROGRESS)
-3.  : User confirms auto-scroll is broken and suggests new logic. (IN PROGRESS)
-4.  : User reiterates auto-scroll is broken and requests a new song link feature. (IN PROGRESS)
-5.  : User postpones the MIDI feature. (DONE)
-6.  : User asks for feature suggestions. (DONE)
-7.  : User selects new features to implement. (DONE)
-8.  : User gives feedback on UI. (DONE)
-9.  : User requests more UI cleanup. (DONE)
-10. : User reports a bug. (USER VERIFICATION PENDING)
+1.  : User asks for a critical assessment of the app for commercial viability. (IN PROGRESS)
+2.  : User approves the list of 6 quick win improvements. (IN PROGRESS)
+3.  : User requests moving key controls to the main teleprompter UI. (DONE)
+4.  : User reports a bug with scroll speed not persisting. (RESOLVED)
+5.  : User requests live lyric editing and persistent per-song scroll settings. (DONE)
+6.  : User requests a UI tweak for pause markers. (DONE)
+7.  : User reports a bug with the auto-pause feature not resuming. (RESOLVED)
+8.  : User requests changing the auto-pause logic from seconds to bars. (DONE)
+9.  : User requests a feature for automatic pauses during instrumental sections. (DONE)
+10. : User reports the transcription feature is still broken after a fix attempt. **(PENDING - CRITICAL)**
 
 **Project Health Check:**
--   **Broken**: The auto-scroll feature is non-functional and is a major blocker for user satisfaction.
--   **Mocked**: N/A
+-   **Broken**: The audio-to-text transcription workflow is non-functional. This is a critical feature failure that the user has repeatedly reported.
 
 **3rd Party Integrations**
--   **OpenAI Whisper** — uses Emergent LLM Key
+-   **OpenAI Whisper** — uses Emergent LLM Key for speech-to-text.
+-   **mutagen** — Python library used to extract metadata (duration) from audio files.
 
 **Testing status**
 -   **Testing agent used after significant changes**: YES
 -   **Troubleshoot agent used after agent stuck in loop**: NO
 -   **Test files created**: []
--   **Known regressions**: The auto-scroll feature has repeatedly broken after attempted fixes.
+-   **Known regressions**: The audio transcription feature has repeatedly failed after attempted fixes.
 
 **Credentials to test flow:**
 -   N/A
 
 **What agent forgot to execute**
--   The agent did not test the last set of changes made to fix the auto-scroll feature and implement the song link feature.
--   The agent did not address the visual bug in the Lyric Formatter's Chords Inline mode, where chords are placed on a new line instead of being inline with the text.</analysis>
+-   The agent failed to fully resolve the critical audio transcription bug, getting distracted by subsequent feature requests.
+-   The agent did not complete the implementation of the Quick Wins task. The refactor of  is unfinished, and the Keyboard Shortcut Help feature was not started.</analysis>
