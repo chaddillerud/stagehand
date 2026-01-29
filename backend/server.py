@@ -41,6 +41,7 @@ class Song(BaseModel):
     duration: str = ""
     notes: str = ""
     lyrics: str = ""
+    link: str = ""  # URL to online version
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -52,6 +53,7 @@ class SongCreate(BaseModel):
     duration: Optional[str] = ""
     notes: Optional[str] = ""
     lyrics: Optional[str] = ""
+    link: Optional[str] = ""  # URL to Spotify, YouTube, etc.
 
 class SongUpdate(BaseModel):
     name: Optional[str] = None
@@ -61,6 +63,7 @@ class SongUpdate(BaseModel):
     duration: Optional[str] = None
     notes: Optional[str] = None
     lyrics: Optional[str] = None
+    link: Optional[str] = None
 
 class SetList(BaseModel):
     model_config = ConfigDict(extra="ignore")
