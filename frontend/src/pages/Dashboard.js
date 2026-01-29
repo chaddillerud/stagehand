@@ -431,23 +431,13 @@ export default function Dashboard() {
                       </button>
                       <button
                         data-testid={`delete-setlist-${setlist.id}`}
-                        onClick={(e) => { e.stopPropagation(); deleteSetlist(setlist.id); }}
+                        onClick={(e) => deleteSetList(setlist.id, e)}
                         title="Delete"
                         className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
                       >
                         <Trash2 size={16} strokeWidth={1.5} />
-                      {setlist.name}
-                    </h3>
-                    <button
-                      data-testid={`delete-setlist-${setlist.id}`}
-                      onClick={(e) => deleteSetList(setlist.id, e)}
-                      className="text-zinc-600 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 size={18} strokeWidth={1.5} />
-                    </button>
-                  </div>
-                  <div className="font-mono text-sm text-zinc-500">
-                    [{setlist.song_ids.length}] SONGS / {calculateTotalTime(setlist.song_ids)}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -457,73 +447,112 @@ export default function Dashboard() {
 
         {/* Songs Library Section */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl md:text-5xl font-oswald font-bold tracking-tight uppercase text-white">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <h2 className="text-2xl md:text-3xl font-oswald font-semibold tracking-tight text-white">
               Songs Library
             </h2>
-            <div className="flex gap-4">
+            
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                data-testid="song-search-input"
+                type="text"
+                placeholder="Search songs by title or artist..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder:text-zinc-600 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            
+            <div className="flex gap-3">
               <button
                 data-testid="import-song-btn"
                 onClick={() => setShowImportModal(true)}
                 title="Import .txt File"
-                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
+                className="btn-secondary rounded-lg p-2.5 transition-colors"
               >
                 <Upload size={18} strokeWidth={1.5} />
               </button>
               <button
                 data-testid="create-song-from-audio-btn"
                 onClick={() => setShowAudioSongModal(true)}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+                className="btn-secondary rounded-lg px-4 py-2.5 flex items-center gap-2 font-oswald uppercase tracking-wider text-sm"
               >
-                <Mic size={20} strokeWidth={2.5} />
+                <Mic size={18} strokeWidth={2} />
                 From Audio
               </button>
               <button
                 data-testid="create-song-btn"
                 onClick={createNewSong}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+                className="btn-primary rounded-lg px-5 py-2.5 flex items-center gap-2 font-oswald uppercase tracking-wider text-sm"
               >
-                <Plus size={20} strokeWidth={2.5} />
+                <Plus size={18} strokeWidth={2.5} />
                 New Song
               </button>
             </div>
           </div>
 
-          {songs.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-none p-12 text-center">
+          {filteredSongs.length === 0 ? (
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-12 text-center">
               <Music size={48} className="mx-auto mb-4 text-zinc-700" strokeWidth={1.5} />
-              <p className="text-zinc-500 text-lg">No songs yet. Create or import one!</p>
+              <p className="text-zinc-500">
+                {searchQuery ? `No songs matching "${searchQuery}"` : "No songs yet. Create or import one!"}
+              </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {songs.map((song) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredSongs.map((song) => (
                 <div
                   key={song.id}
                   data-testid={`song-card-${song.id}`}
-                  onClick={() => navigate(`/song/${song.id}`)}
-                  className="bg-zinc-900 border border-zinc-800 rounded-none p-6 hover:border-yellow-400/50 transition-all cursor-pointer group relative overflow-hidden hover:shadow-[4px_4px_0px_0px_rgba(250,204,21,1)]"
+                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 hover:border-amber-500/50 transition-all cursor-pointer group relative"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-yellow-400 transition-colors mb-1">
+                  <div className="flex items-start justify-between mb-3" onClick={() => navigate(`/song/${song.id}`)}>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors">
                         {song.name}
                       </h3>
                       {song.artist && (
-                        <p className="text-zinc-400 text-sm">{song.artist}</p>
+                        <p className="text-zinc-500 text-sm">{song.artist}</p>
                       )}
                     </div>
-                    <button
-                      data-testid={`delete-song-${song.id}`}
-                      onClick={(e) => deleteSong(song.id, e)}
-                      className="text-zinc-600 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 size={18} strokeWidth={1.5} />
-                    </button>
                   </div>
-                  <div className="flex gap-4 text-xs font-mono text-zinc-500">
-                    {song.key && <span>KEY: {song.key}</span>}
-                    {song.tempo && <span>BPM: {song.tempo}</span>}
-                    {song.duration && <span>DUR: {song.duration}</span>}
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-3 text-xs font-mono text-zinc-600" onClick={() => navigate(`/song/${song.id}`)}>
+                      {song.key && <span>KEY: {song.key}</span>}
+                      {song.tempo && <span>BPM: {song.tempo}</span>}
+                      {song.duration && <span>{song.duration}</span>}
+                      {song.audio_file && (
+                        <span className="text-emerald-500" title="Has practice track">♪</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        data-testid={`duplicate-song-${song.id}`}
+                        onClick={(e) => { e.stopPropagation(); duplicateSong(song); }}
+                        title="Duplicate"
+                        className="text-zinc-500 hover:text-violet-400 p-1.5 transition-colors"
+                      >
+                        <Copy size={16} strokeWidth={1.5} />
+                      </button>
+                      <button
+                        data-testid={`delete-song-${song.id}`}
+                        onClick={(e) => deleteSong(song.id, e)}
+                        title="Delete"
+                        className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
+                      >
+                        <Trash2 size={16} strokeWidth={1.5} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
