@@ -49,6 +49,8 @@ class Song(BaseModel):
     notes: str = ""
     lyrics: str = ""
     audio_file: str = ""  # Path to uploaded practice audio file
+    scroll_speed: float = 1.0  # Per-song scroll speed (0.5 to 3.0)
+    auto_scroll: bool = True  # Per-song auto-scroll setting
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -61,6 +63,8 @@ class SongCreate(BaseModel):
     notes: Optional[str] = ""
     lyrics: Optional[str] = ""
     audio_file: Optional[str] = ""
+    scroll_speed: Optional[float] = 1.0
+    auto_scroll: Optional[bool] = True
 
 class SongUpdate(BaseModel):
     name: Optional[str] = None
@@ -71,6 +75,8 @@ class SongUpdate(BaseModel):
     notes: Optional[str] = None
     lyrics: Optional[str] = None
     audio_file: Optional[str] = None
+    scroll_speed: Optional[float] = None
+    auto_scroll: Optional[bool] = None
 
 class SetList(BaseModel):
     model_config = ConfigDict(extra="ignore")
