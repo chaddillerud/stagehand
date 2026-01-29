@@ -331,14 +331,6 @@ export default function Dashboard() {
             </h2>
             <div className="flex gap-4">
               <button
-                data-testid="transcribe-audio-btn"
-                onClick={() => setShowTranscribeModal(true)}
-                title="Transcribe Audio to Lyrics"
-                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-green-400 hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
-              >
-                <Music size={18} strokeWidth={1.5} />
-              </button>
-              <button
                 data-testid="import-song-btn"
                 onClick={() => setShowImportModal(true)}
                 title="Import .txt File"
