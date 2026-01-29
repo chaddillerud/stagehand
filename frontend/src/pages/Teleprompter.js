@@ -339,6 +339,11 @@ export default function Teleprompter() {
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
     }
+    // Play audio if practice mode enabled
+    if (practiceMode && audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    }
   };
 
   const stop = () => {
@@ -349,10 +354,25 @@ export default function Teleprompter() {
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
     }
+    // Stop audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    const newIsPlaying = !isPlaying;
+    setIsPlaying(newIsPlaying);
+    
+    // Sync audio with play/pause
+    if (practiceMode && audioRef.current) {
+      if (newIsPlaying) {
+        audioRef.current.play().catch(() => {});
+      } else {
+        audioRef.current.pause();
+      }
+    }
   };
 
   const previous = () => {
@@ -361,6 +381,11 @@ export default function Teleprompter() {
       // Reset scroll position for new song
       if (lyricsRef.current) {
         lyricsRef.current.scrollTop = 0;
+      }
+      // Reset audio for new song
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
       }
     }
   };
@@ -372,6 +397,11 @@ export default function Teleprompter() {
       if (lyricsRef.current) {
         lyricsRef.current.scrollTop = 0;
       }
+      // Reset audio for new song
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
     }
   };
 
@@ -380,6 +410,11 @@ export default function Teleprompter() {
     // Reset scroll position for new song
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
+    }
+    // Reset audio for new song
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   };
 
