@@ -289,6 +289,119 @@ export default function Teleprompter() {
   // Count songs with audio for practice mode indicator
   const songsWithAudio = songs.filter(s => s.audio_file).length;
 
+  // Initialize Audio Context for click track
+  const initAudioContext = () => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContextRef.current;
+  };
+
+  // Play a metronome click sound
+  const playClick = (isAccent = false) => {
+    const ctx = initAudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    // Classic metronome: higher pitch for accent (beat 1), lower for others
+    oscillator.frequency.value = isAccent ? 1000 : 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.1);
+  };
+
+  // Start click track metronome
+  const startClickTrack = (bpm) => {
+    if (clickIntervalRef.current) {
+      clearInterval(clickIntervalRef.current);
+    }
+    
+    if (!bpm || bpm <= 0) return;
+    
+    const msPerBeat = 60000 / bpm;
+    let beatCount = 0;
+    
+    // Play first click immediately
+    playClick(true);
+    beatCount++;
+    
+    clickIntervalRef.current = setInterval(() => {
+      const isAccent = beatCount % 4 === 0;
+      playClick(isAccent);
+      beatCount++;
+    }, msPerBeat);
+  };
+
+  // Stop click track
+  const stopClickTrack = () => {
+    if (clickIntervalRef.current) {
+      clearInterval(clickIntervalRef.current);
+      clickIntervalRef.current = null;
+    }
+  };
+
+  // Handle count-in before starting
+  const doCountIn = (bpm, numBeats, callback) => {
+    if (!bpm || bpm <= 0 || numBeats <= 0) {
+      callback();
+      return;
+    }
+    
+    setIsCountingIn(true);
+    setCountInBeats(numBeats);
+    
+    const msPerBeat = 60000 / bpm;
+    let beatsRemaining = numBeats;
+    
+    // Play first beat immediately
+    playClick(true);
+    beatsRemaining--;
+    setCountInBeats(beatsRemaining);
+    
+    const countInterval = setInterval(() => {
+      if (beatsRemaining <= 0) {
+        clearInterval(countInterval);
+        setIsCountingIn(false);
+        setCountInBeats(0);
+        callback();
+        return;
+      }
+      
+      const isAccent = (numBeats - beatsRemaining) % 4 === 0;
+      playClick(isAccent);
+      beatsRemaining--;
+      setCountInBeats(beatsRemaining);
+    }, msPerBeat);
+  };
+
+  // Click track effect - start/stop based on playing state
+  useEffect(() => {
+    if (!clickTrackEnabled || !isPlaying || isCountingIn) {
+      stopClickTrack();
+      return;
+    }
+    
+    const currentSong = songs[currentIndex];
+    const bpm = currentSong?.tempo ? parseInt(currentSong.tempo) : 0;
+    
+    if (bpm > 0) {
+      startClickTrack(bpm);
+    }
+    
+    return () => stopClickTrack();
+  }, [clickTrackEnabled, isPlaying, currentIndex, songs, isCountingIn]);
+
   const loadSetList = async () => {
     try {
       const setlistRes = await axios.get(`${API}/setlists/${setlistId}`);
