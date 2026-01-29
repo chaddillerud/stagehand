@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Plus, Music, Trash2, Upload, Download, FileJson, Mic, Loader2, Search, Copy, HelpCircle } from "lucide-react";
+import { Plus, Music, Trash2, Upload, Download, FileJson, Mic, Loader2, Search, Copy, HelpCircle, X, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -699,6 +699,106 @@ export default function Dashboard() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Modal */}
+      {showShortcutsModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-lg w-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-oswald font-bold text-white flex items-center gap-3">
+                <Keyboard size={24} className="text-amber-400" />
+                Keyboard Shortcuts
+              </h3>
+              <button
+                data-testid="close-shortcuts-modal"
+                onClick={() => setShowShortcutsModal(false)}
+                className="text-zinc-500 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Teleprompter Shortcuts */}
+              <div>
+                <h4 className="text-sm font-oswald uppercase tracking-wider text-amber-400 mb-3">
+                  Teleprompter
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    { key: "Space", action: "Play / Pause" },
+                    { key: "→ or PageDown", action: "Next Song" },
+                    { key: "← or PageUp", action: "Previous Song" },
+                    { key: "Home", action: "Start Set" },
+                    { key: "Escape", action: "Stop" },
+                    { key: "S", action: "Toggle Settings" },
+                  ].map((shortcut) => (
+                    <div key={shortcut.key} className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-sm">{shortcut.action}</span>
+                      <kbd className="bg-zinc-800 border border-zinc-700 text-zinc-300 px-2 py-1 rounded text-xs font-mono">
+                        {shortcut.key}
+                      </kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dashboard Shortcuts */}
+              <div>
+                <h4 className="text-sm font-oswald uppercase tracking-wider text-violet-400 mb-3">
+                  Dashboard
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    { key: "?", action: "Show this help" },
+                  ].map((shortcut) => (
+                    <div key={shortcut.key} className="flex items-center justify-between">
+                      <span className="text-zinc-400 text-sm">{shortcut.action}</span>
+                      <kbd className="bg-zinc-800 border border-zinc-700 text-zinc-300 px-2 py-1 rounded text-xs font-mono">
+                        {shortcut.key}
+                      </kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Touch Gestures */}
+              <div>
+                <h4 className="text-sm font-oswald uppercase tracking-wider text-emerald-400 mb-3">
+                  Touch Gestures (Teleprompter)
+                </h4>
+                <div className="space-y-2 text-sm text-zinc-400">
+                  <div className="flex items-center justify-between">
+                    <span>Swipe Left</span>
+                    <span className="text-zinc-500">Next Song</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Swipe Right</span>
+                    <span className="text-zinc-500">Previous Song</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Foot Pedal */}
+              <div className="pt-4 border-t border-zinc-800">
+                <h4 className="text-sm font-oswald uppercase tracking-wider text-zinc-500 mb-2">
+                  Bluetooth Foot Pedal
+                </h4>
+                <p className="text-xs text-zinc-600">
+                  Connect a Bluetooth gamepad/foot pedal. Button 1 = Next, Button 2 = Prev, Button 3 = Play/Pause
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowShortcutsModal(false)}
+              className="w-full mt-6 btn-primary rounded-lg py-3 font-oswald uppercase tracking-wider"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}
