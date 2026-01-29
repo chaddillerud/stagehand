@@ -78,7 +78,13 @@ export default function SongEditor() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setAudioFile(response.data.audio_file);
-      toast.success("Practice track uploaded!");
+      // Update duration if extracted from audio
+      if (response.data.duration) {
+        setDuration(response.data.duration);
+        toast.success(`Practice track uploaded! Duration: ${response.data.duration}`);
+      } else {
+        toast.success("Practice track uploaded!");
+      }
     } catch (error) {
       console.error("Error uploading audio:", error);
       toast.error(error.response?.data?.detail || "Failed to upload audio");
