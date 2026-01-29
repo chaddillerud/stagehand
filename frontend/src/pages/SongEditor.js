@@ -45,11 +45,63 @@ export default function SongEditor() {
       setNotes(song.notes || "");
       setLyrics(song.lyrics || "");
       setLink(song.link || "");
+      setAudioFile(song.audio_file || "");
       setLoading(false);
     } catch (error) {
       console.error("Error loading song:", error);
       toast.error("Failed to load song");
       setLoading(false);
+    }
+  };
+
+  const handleAudioUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp4', 'audio/x-m4a', 'audio/ogg', 'audio/flac', 'audio/aac'];
+    if (!allowedTypes.some(type => file.type.includes(type.split('/')[1]))) {
+      toast.error("Please upload an audio file (MP3, WAV, M4A, OGG, FLAC)");
+      return;
+    }
+
+    // Check file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Maximum size: 50MB");
+      return;
+    }
+
+    setUploadingAudio(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios.post(`${API}/songs/${id}/audio`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setAudioFile(response.data.audio_file);
+      toast.success("Practice track uploaded!");
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      toast.error(error.response?.data?.detail || "Failed to upload audio");
+    } finally {
+      setUploadingAudio(false);
+      if (audioInputRef.current) {
+        audioInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteAudio = async () => {
+    if (!window.confirm("Remove practice track from this song?")) return;
+
+    try {
+      await axios.delete(`${API}/songs/${id}/audio`);
+      setAudioFile("");
+      toast.success("Practice track removed");
+    } catch (error) {
+      console.error("Error deleting audio:", error);
+      toast.error("Failed to remove audio");
     }
   };
 
