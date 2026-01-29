@@ -337,7 +337,17 @@ async def upload_song_audio(song_id: str, transcribe: bool = False, file: Upload
     if transcribe:
         try:
             stt = OpenAISpeechToText(api_key=os.getenv("EMERGENT_LLM_KEY"))
-            transcribed_lyrics = await stt.transcribe(str(audio_path))
+            with open(audio_path, "rb") as audio_file:
+                response = await stt.transcribe(
+                    file=audio_file,
+                    model="whisper-1",
+                    response_format="text"
+                )
+            # Extract text from response
+            if isinstance(response, str):
+                transcribed_lyrics = response
+            else:
+                transcribed_lyrics = getattr(response, 'text', str(response))
             logger.info(f"Transcribed audio for song {song_id}")
         except Exception as e:
             logger.warning(f"Could not transcribe audio: {e}")
