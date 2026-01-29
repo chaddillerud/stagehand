@@ -329,9 +329,15 @@ export default function Teleprompter() {
   }, [songs]);
 
   useEffect(() => {
-    // Reset scroll when song changes
+    // Reset scroll and pause state when song changes
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
+    }
+    lastPauseMarkerRef.current = null;
+    setScrollPaused(false);
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
     }
   }, [currentIndex]);
 
