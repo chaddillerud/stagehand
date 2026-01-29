@@ -152,11 +152,11 @@ export default function Teleprompter() {
     };
   }, [isPlaying]);
 
-  // Auto-scroll effect - FIXED: proper dependency handling and simpler calculation
+  // Auto-scroll effect - Uses requestAnimationFrame with time-based accumulator
   useEffect(() => {
-    // Clear any existing interval first
+    // Clear any existing animation
     if (autoScrollIntervalRef.current) {
-      clearInterval(autoScrollIntervalRef.current);
+      cancelAnimationFrame(autoScrollIntervalRef.current);
       autoScrollIntervalRef.current = null;
     }
 
@@ -181,6 +181,7 @@ export default function Teleprompter() {
     };
 
     const songDurationSeconds = parseDuration(currentSong.duration);
+    const effectiveDuration = songDurationSeconds > 0 ? songDurationSeconds : 60;
     
     // Calculate scroll parameters
     const container = lyricsRef.current;
@@ -190,38 +191,50 @@ export default function Teleprompter() {
       return; // Nothing to scroll
     }
 
-    // Calculate pixels per second
-    // If song has duration, use that. Otherwise, use a sensible default (60 seconds)
-    const effectiveDuration = songDurationSeconds > 0 ? songDurationSeconds : 60;
-    
-    // Base: scroll the entire content over the song duration
-    // At 100% speed (scrollSpeed=1.0), complete scroll = song duration
-    let pixelsPerSecond = totalScrollHeight / effectiveDuration;
-    
-    // Apply user speed multiplier (slider is 0.5 to 3.0)
-    pixelsPerSecond *= scrollSpeed;
+    // Calculate pixels per second based on song duration
+    const basePixelsPerSecond = totalScrollHeight / effectiveDuration;
+    const pixelsPerSecond = basePixelsPerSecond * scrollSpeed;
 
-    // Frame-based scrolling for smooth animation
-    const frameRate = 60;
-    const pixelsPerFrame = pixelsPerSecond / frameRate;
+    console.log(`🎵 AUTO-SCROLL ACTIVE: "${currentSong.name}" | Duration: ${effectiveDuration}s | Speed: ${Math.round(scrollSpeed * 100)}% | ${pixelsPerSecond.toFixed(1)}px/sec | Total scroll: ${totalScrollHeight}px`);
 
-    console.log(`🎵 AUTO-SCROLL: Song "${currentSong.name}" | Duration: ${effectiveDuration}s | Speed: ${Math.round(scrollSpeed * 100)}% | ${pixelsPerSecond.toFixed(1)}px/sec`);
+    // Use requestAnimationFrame with time-based scrolling for accuracy
+    let lastTime = performance.now();
+    let accumulatedScroll = 0;
 
-    // Start the scroll interval
-    autoScrollIntervalRef.current = setInterval(() => {
+    const scrollStep = (currentTime) => {
       const el = lyricsRef.current;
-      if (!el) return;
-      
-      const maxScroll = el.scrollHeight - el.clientHeight;
-      if (el.scrollTop < maxScroll) {
-        el.scrollTop += pixelsPerFrame;
+      if (!el) {
+        autoScrollIntervalRef.current = requestAnimationFrame(scrollStep);
+        return;
       }
-    }, 1000 / frameRate);
+
+      const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+      lastTime = currentTime;
+
+      // Accumulate scroll amount
+      accumulatedScroll += pixelsPerSecond * deltaTime;
+
+      // Only scroll when we have at least 1 pixel accumulated
+      if (accumulatedScroll >= 1) {
+        const scrollAmount = Math.floor(accumulatedScroll);
+        accumulatedScroll -= scrollAmount;
+
+        const maxScroll = el.scrollHeight - el.clientHeight;
+        if (el.scrollTop < maxScroll) {
+          el.scrollTop += scrollAmount;
+        }
+      }
+
+      autoScrollIntervalRef.current = requestAnimationFrame(scrollStep);
+    };
+
+    // Start the animation loop
+    autoScrollIntervalRef.current = requestAnimationFrame(scrollStep);
 
     // Cleanup
     return () => {
       if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
+        cancelAnimationFrame(autoScrollIntervalRef.current);
         autoScrollIntervalRef.current = null;
       }
     };
