@@ -114,6 +114,37 @@ export default function Dashboard() {
     }
   };
 
+  const handleCreateFromAudio = async () => {
+    if (!audioFile) {
+      toast.error("Please select an audio file");
+      return;
+    }
+
+    setIsCreatingFromAudio(true);
+
+    const formData = new FormData();
+    formData.append("file", audioFile);
+
+    try {
+      const response = await axios.post(`${API}/songs/from-audio`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      
+      setSongs([...songs, response.data]);
+      setAudioFile(null);
+      setShowAudioSongModal(false);
+      toast.success("Song created from audio! Opening editor...");
+      
+      // Navigate to edit the new song
+      navigate(`/song/${response.data.id}`);
+    } catch (error) {
+      console.error("Error creating song from audio:", error);
+      toast.error(error.response?.data?.detail || "Failed to create song from audio");
+    } finally {
+      setIsCreatingFromAudio(false);
+    }
+  };
+
   const createNewSong = () => {
     navigate("/song/new");
   };
