@@ -111,6 +111,7 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 songs: {
   id, name, artist, key, tempo, duration, 
   notes, lyrics, audio_file,
+  scroll_speed, auto_scroll,
   created_at, updated_at
 }
 
@@ -122,11 +123,21 @@ setlists: {
 
 ## Known Issues
 - Lyric Formatter "Chords Inline" mode has a visual bug (chords on new line instead of inline)
+- Audio transcription workflow may have issues (user reported, needs investigation)
+
+## Completed (Jan 2026)
+- [x] Dashboard Quick Wins UI overhaul (logo, search, duplicate, shortcuts modal)
+- [x] Persistent per-song scroll settings
+- [x] On-the-fly lyric editing in teleprompter
+- [x] Automatic pause markers ([Solo:8] format based on bars)
+- [x] Click track with count-in options
 
 ## Future/Backlog Tasks
-- [ ] MIDI control integration
 - [ ] Stage Notes Between Songs (transition notes)
+- [ ] Time signature support for click track (3/4, 6/8)
+- [ ] MIDI control integration
 - [ ] Song Tags/Filters
 - [ ] Timestamp-Based Auto-Scroll (LRC-style sync)
 - [ ] Per-song volume adjustment
-- [ ] Time signature support for click track (3/4, 6/8, etc.)
+- [ ] Folder organization for songs
+- [ ] Setlist templates
