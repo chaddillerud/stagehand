@@ -192,6 +192,83 @@ async def import_song(file: UploadFile = File(...)):
     return await create_song(song_data)
 
 
+# Create song from audio file (upload, transcribe, extract duration - all in one)
+@api_router.post("/songs/from-audio")
+async def create_song_from_audio(file: UploadFile = File(...)):
+    """Create a new song from an audio file - transcribes lyrics and extracts duration"""
+    
+    # Validate file type
+    allowed_extensions = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.flac', '.aac']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+        )
+    
+    # Read file content
+    content = await file.read()
+    
+    # Check file size (50MB limit)
+    if len(content) > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 50MB")
+    
+    # Generate song ID and filename
+    song_id = str(uuid.uuid4())
+    audio_filename = f"{song_id}_{uuid.uuid4().hex[:8]}{file_ext}"
+    audio_path = AUDIO_STORAGE_DIR / audio_filename
+    
+    # Save file
+    with open(audio_path, "wb") as f:
+        f.write(content)
+    
+    # Extract duration from audio file using mutagen
+    extracted_duration = ""
+    try:
+        audio = AudioFile(str(audio_path))
+        if audio and audio.info:
+            duration_seconds = int(audio.info.length)
+            mins = duration_seconds // 60
+            secs = duration_seconds % 60
+            extracted_duration = f"{mins}:{secs:02d}"
+    except Exception as e:
+        logger.warning(f"Could not extract duration from audio: {e}")
+    
+    # Transcribe audio
+    transcribed_lyrics = ""
+    try:
+        stt = OpenAISpeechToText()
+        transcribed_lyrics = await stt.transcribe_audio(str(audio_path))
+        logger.info(f"Transcribed audio for new song {song_id}")
+    except Exception as e:
+        logger.warning(f"Could not transcribe audio: {e}")
+    
+    # Use filename (without extension) as default song name
+    default_name = os.path.splitext(file.filename)[0]
+    
+    # Create song document
+    song_doc = {
+        "id": song_id,
+        "name": default_name,
+        "artist": "",
+        "key": "",
+        "tempo": "",
+        "duration": extracted_duration,
+        "notes": "",
+        "lyrics": transcribed_lyrics,
+        "audio_file": audio_filename,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.songs.insert_one(song_doc)
+    
+    # Return without _id
+    del song_doc["_id"] if "_id" in song_doc else None
+    
+    return song_doc
+
+
 # Audio file upload for practice mode with optional transcription
 @api_router.post("/songs/{song_id}/audio")
 async def upload_song_audio(song_id: str, transcribe: bool = False, file: UploadFile = File(...)):
