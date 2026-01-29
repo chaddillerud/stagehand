@@ -7,12 +7,12 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 
 ### Song Management
 - [x] Create, edit, delete songs
-- [x] Fields: name, artist, key, tempo, duration, notes, lyrics
+- [x] Fields: name, artist, key, tempo (BPM), duration, notes, lyrics
 - [x] Import songs from .txt files
 - [x] Audio transcription via OpenAI Whisper
 - [x] Lyric formatter tool (standardize spacing, handle chords)
-- [x] Practice Link field (YouTube, Spotify, Bandcamp URLs)
 - [x] **Practice Track upload (MP3, WAV, M4A, OGG, FLAC - max 50MB)**
+- [x] **Auto-extract duration from uploaded audio files**
 
 ### Setlist Management
 - [x] Create, edit, delete setlists
@@ -20,6 +20,7 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - [x] Total set time display
 - [x] Double-click song to edit
 - [x] Print-friendly view
+- [x] **AUDIO badge for songs with practice tracks**
 
 ### Teleprompter
 - [x] Pop-out window
@@ -36,16 +37,24 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - [x] Touch gestures (swipe for prev/next)
 - [x] Keyboard shortcuts
 - [x] **Practice Mode with audio playback**
+- [x] **Click Track (Metronome) with BPM sync**
+- [x] **Count-In (None / 4 Beats / 8 Beats)**
 
-### Practice Mode (NEW - Jan 29, 2026)
+### Practice Mode (Jan 29, 2026)
 - [x] Upload MP3/audio files per song
+- [x] Duration auto-extracted from audio file
 - [x] Practice Mode toggle in teleprompter settings
 - [x] Audio plays automatically when performance starts
 - [x] Syncs with Play/Pause/Stop controls
 - [x] Auto-advances to next song when audio ends
 - [x] Mute toggle
-- [x] Music icon indicator for songs with tracks
-- [x] "Track loaded" / "No practice track" status messages
+
+### Click Track (Jan 29, 2026)
+- [x] Classic metronome tick sound (Web Audio API)
+- [x] Syncs with song BPM
+- [x] Works with or without practice audio
+- [x] Count-In options: None, 4 Beats, 8 Beats
+- [x] Large countdown overlay during count-in
 
 ### Backup & Restore
 - [x] Full database backup/restore
@@ -54,6 +63,7 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - **Frontend**: React, Tailwind CSS, Shadcn UI
 - **Backend**: FastAPI, Motor (async MongoDB)
 - **Database**: MongoDB
+- **Audio Processing**: mutagen (duration extraction)
 - **Integrations**: OpenAI Whisper (via Emergent LLM Key)
 - **Audio Storage**: Local file storage (/app/backend/audio_files/)
 
@@ -63,7 +73,7 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - `POST /api/songs/import` - Import .txt file
 - `POST /api/songs/transcribe-audio` - Transcribe audio file
 - `POST /api/songs/transcribe-url` - Transcribe from URL
-- `POST /api/songs/{id}/audio` - Upload practice track
+- `POST /api/songs/{id}/audio` - Upload practice track (auto-extracts duration)
 - `DELETE /api/songs/{id}/audio` - Delete practice track
 - `GET /api/audio/{filename}` - Stream audio file
 - `GET/POST /api/setlists` - List/Create setlists
@@ -73,7 +83,7 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 ```
 songs: {
   id, name, artist, key, tempo, duration, 
-  notes, lyrics, link, audio_file,
+  notes, lyrics, audio_file,
   created_at, updated_at
 }
 
@@ -83,6 +93,9 @@ setlists: {
 }
 ```
 
+## Removed Features
+- Practice Link field (replaced by audio upload)
+
 ## Known Issues
 - Lyric Formatter "Chords Inline" mode has a visual bug (chords on new line instead of inline)
 
@@ -91,3 +104,4 @@ setlists: {
 - [ ] Stage Notes Between Songs (transition notes)
 - [ ] Song Tags/Filters
 - [ ] Timestamp-Based Auto-Scroll (LRC-style sync)
+- [ ] Per-song volume adjustment
