@@ -10,10 +10,11 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - [x] Fields: name, artist, key, tempo (BPM), duration, notes, lyrics
 - [x] Import songs from .txt files
 - [x] Lyric formatter tool (standardize spacing, handle chords)
-- [x] **Practice Track upload (MP3, WAV, M4A, OGG, FLAC - max 50MB)**
-- [x] **Auto-extract duration from uploaded audio files**
-- [x] **Auto-transcribe lyrics from audio (via OpenAI Whisper)**
-- [x] **Smart transcribe: asks before replacing existing lyrics**
+- [x] **NEW: Create song from audio file** (auto-transcribes lyrics, extracts duration)
+- [x] Practice Track upload (MP3, WAV, M4A, OGG, FLAC - max 50MB)
+- [x] Auto-extract duration from uploaded audio files
+- [x] Auto-transcribe lyrics from audio (via OpenAI Whisper)
+- [x] Smart transcribe: asks before replacing existing lyrics
 
 ### Setlist Management
 - [x] Create, edit, delete setlists
@@ -37,9 +38,9 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - [x] Bluetooth foot pedal support
 - [x] Touch gestures (swipe for prev/next)
 - [x] Keyboard shortcuts
-- [x] **Practice Mode with audio playback**
-- [x] **Click Track (Metronome) with BPM sync**
-- [x] **Count-In (None / 4 Beats / 8 Beats)**
+- [x] Practice Mode with audio playback
+- [x] Click Track (Metronome) with BPM sync
+- [x] Count-In (None / 4 Beats / 8 Beats)
 
 ### Practice Mode
 - [x] Upload MP3/audio files per song
@@ -61,6 +62,20 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 ### Backup & Restore
 - [x] Full database backup/restore
 
+## Song Creation Workflows
+
+### Option A: From Audio (Recommended)
+1. Dashboard → Click "FROM AUDIO" (green button)
+2. Upload MP3/WAV file
+3. System auto-transcribes lyrics + extracts duration
+4. Redirects to Song Editor with pre-filled data
+5. Add song name, artist, key, BPM, notes → Save
+
+### Option B: Manual Entry
+1. Dashboard → Click "NEW SONG" (yellow button)
+2. Fill in song details manually
+3. Optionally upload practice track later
+
 ## Tech Stack
 - **Frontend**: React, Tailwind CSS, Shadcn UI
 - **Backend**: FastAPI, Motor (async MongoDB)
@@ -73,7 +88,8 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - `GET/POST /api/songs` - List/Create songs
 - `GET/PUT/DELETE /api/songs/{id}` - Song CRUD
 - `POST /api/songs/import` - Import .txt file
-- `POST /api/songs/{id}/audio?transcribe=true/false` - Upload practice track (auto-extracts duration, optionally transcribes)
+- `POST /api/songs/from-audio` - Create song from audio (transcribe + extract duration)
+- `POST /api/songs/{id}/audio?transcribe=true/false` - Upload practice track
 - `DELETE /api/songs/{id}/audio` - Delete practice track
 - `GET /api/audio/{filename}` - Stream audio file
 - `GET/POST /api/setlists` - List/Create setlists
@@ -94,10 +110,6 @@ setlists: {
   created_at, updated_at
 }
 ```
-
-## Removed Features
-- Practice Link field (replaced by audio upload)
-- Separate Transcribe Audio button on Dashboard (integrated into practice track upload)
 
 ## Known Issues
 - Lyric Formatter "Chords Inline" mode has a visual bug (chords on new line instead of inline)
