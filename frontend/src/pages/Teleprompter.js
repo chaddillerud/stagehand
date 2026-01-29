@@ -50,7 +50,10 @@ export default function Teleprompter() {
   const [countIn, setCountIn] = useState('none'); // none, 4, 8 beats
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeats, setCountInBeats] = useState(0);
-  const [scrollPaused, setScrollPaused] = useState(false); // For [Solo:30] style pauses
+  const [scrollPaused, setScrollPaused] = useState(false); // For [Solo:8] style pauses
+  const [editMode, setEditMode] = useState(false); // Edit lyrics on the fly
+  const [editingLyrics, setEditingLyrics] = useState(""); // Temp lyrics while editing
+  const [savingLyrics, setSavingLyrics] = useState(false);
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const clockRef = useRef(null);
