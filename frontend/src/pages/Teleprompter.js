@@ -853,6 +853,44 @@ export default function Teleprompter() {
             )}
           </div>
 
+          {/* Practice Mode Settings */}
+          <div className="mb-4 pt-4 border-t border-zinc-800">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Practice Mode
+            </label>
+            
+            <div className="flex items-center justify-between mb-3 p-3 bg-zinc-950 border border-zinc-800">
+              <div>
+                <div className="text-white font-bold text-sm flex items-center gap-2">
+                  <Music size={16} className={practiceMode ? 'text-green-500' : 'text-zinc-500'} />
+                  Enable Practice Mode
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {practiceMode ? 'Audio plays with each song' : 'Lyrics only'}
+                </div>
+              </div>
+              <button
+                data-testid="practice-mode-toggle"
+                onClick={() => setPracticeMode(!practiceMode)}
+                className={`w-12 h-6 rounded-full transition-all relative ${
+                  practiceMode ? 'bg-green-600' : 'bg-zinc-700'
+                }`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${
+                  practiceMode ? 'right-0.5' : 'left-0.5'
+                }`} />
+              </button>
+            </div>
+
+            <div className="text-xs text-zinc-500 p-2 bg-zinc-950 border border-zinc-800">
+              {songsWithAudio > 0 ? (
+                <div className="text-green-500">✓ {songsWithAudio} of {songs.length} songs have practice tracks</div>
+              ) : (
+                <div className="text-yellow-500">⚠ No songs have practice tracks uploaded</div>
+              )}
+            </div>
+          </div>
+
           {/* Font Size Settings */}
           <div className="mb-4 pt-4 border-t border-zinc-800">
             <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
