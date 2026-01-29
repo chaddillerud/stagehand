@@ -926,7 +926,23 @@ export default function Teleprompter() {
 
           {/* Lyrics */}
           <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap break-words hyphens-auto`}>
-            {currentSong.lyrics || (
+            {currentSong.lyrics ? (
+              // Render lyrics with highlighted pause markers
+              currentSong.lyrics.split(/(\[[^\]:]+:\d+\])/gi).map((part, index) => {
+                // Check if this part is a pause marker
+                if (/^\[[^\]:]+:\d+\]$/i.test(part)) {
+                  return (
+                    <span 
+                      key={index} 
+                      className="text-yellow-400 bg-yellow-400/20 px-2 py-0.5 rounded"
+                    >
+                      {part}
+                    </span>
+                  );
+                }
+                return <span key={index}>{part}</span>;
+              })
+            ) : (
               <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
             )}
           </div>
