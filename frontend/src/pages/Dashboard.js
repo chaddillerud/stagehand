@@ -514,6 +514,68 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* New Song from Audio Modal */}
+      {showAudioSongModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border-2 border-green-500 rounded-none p-8 max-w-md w-full">
+            <h3 className="text-2xl font-oswald font-bold uppercase mb-6 text-green-400 flex items-center gap-2">
+              <Mic size={24} strokeWidth={2} />
+              New Song from Audio
+            </h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Upload an audio file to create a new song. Lyrics will be automatically transcribed and duration extracted.
+            </p>
+            <div className="bg-green-900/30 border border-green-600 p-3 rounded-none mb-4">
+              <p className="text-green-400 text-xs">
+                ✓ Supports MP3, WAV, M4A, OGG, FLAC (max 50MB)
+              </p>
+            </div>
+            <input
+              data-testid="audio-song-file-input"
+              type="file"
+              accept=".mp3,.wav,.m4a,.mp4,.ogg,.flac,.aac,audio/*"
+              onChange={(e) => setAudioFile(e.target.files[0])}
+              disabled={isCreatingFromAudio}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white file:mr-4 file:py-2 file:px-4 file:rounded-none file:border-0 file:bg-green-600 file:text-white file:font-oswald file:uppercase file:font-bold file:cursor-pointer hover:file:bg-green-700 disabled:opacity-50 mb-6"
+            />
+            {audioFile && (
+              <div className="bg-zinc-950 border border-zinc-800 p-3 mb-4 text-sm">
+                <div className="text-zinc-400">Selected file:</div>
+                <div className="text-white font-mono text-xs truncate">{audioFile.name}</div>
+              </div>
+            )}
+            <div className="flex gap-4">
+              <button
+                data-testid="audio-song-confirm"
+                onClick={handleCreateFromAudio}
+                disabled={isCreatingFromAudio || !audioFile}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isCreatingFromAudio ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Song'
+                )}
+              </button>
+              <button
+                data-testid="audio-song-cancel"
+                onClick={() => {
+                  setShowAudioSongModal(false);
+                  setAudioFile(null);
+                }}
+                disabled={isCreatingFromAudio}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Restore Modal */}
       {showRestoreModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
