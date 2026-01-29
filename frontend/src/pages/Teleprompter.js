@@ -996,6 +996,52 @@ export default function Teleprompter() {
             </div>
           </div>
 
+          {/* Audio Player - Practice Mode */}
+          {practiceMode && (
+            <div className="mb-4 p-3 bg-zinc-950/80 border border-zinc-800 rounded-none">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Music size={18} className={currentSong?.audio_file ? 'text-green-500' : 'text-zinc-600'} />
+                  <span className="text-xs font-oswald uppercase text-zinc-400">Practice Mode</span>
+                </div>
+                
+                {currentSong?.audio_file ? (
+                  <>
+                    <audio
+                      ref={audioRef}
+                      src={`${API}/audio/${currentSong.audio_file}`}
+                      muted={audioMuted}
+                      onEnded={() => {
+                        // Auto-advance to next song when audio ends
+                        if (currentIndex < songs.length - 1) {
+                          next();
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <div className="flex-1 flex items-center gap-3">
+                      <span className="text-xs text-green-500 font-mono">♪ Track loaded</span>
+                    </div>
+                    <button
+                      data-testid="audio-mute-toggle"
+                      onClick={() => setAudioMuted(!audioMuted)}
+                      className={`p-2 rounded-none transition-colors ${
+                        audioMuted ? 'text-red-500 bg-red-500/10' : 'text-zinc-400 hover:text-white'
+                      }`}
+                      title={audioMuted ? 'Unmute' : 'Mute'}
+                    >
+                      {audioMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex-1 text-xs text-zinc-500 font-mono">
+                    No practice track for this song
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Main Controls */}
           <div className={`${orientStyles.mainControls} items-center justify-center`}>
             <button
