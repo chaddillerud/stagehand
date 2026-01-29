@@ -676,6 +676,97 @@ export default function Teleprompter() {
     }
   };
 
+  // Edit lyrics functions
+  const startEditing = () => {
+    const currentSong = songs[currentIndex];
+    if (currentSong) {
+      setEditingLyrics(currentSong.lyrics || "");
+      setEditMode(true);
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditMode(false);
+    setEditingLyrics("");
+  };
+
+  const saveLyrics = async () => {
+    const currentSong = songs[currentIndex];
+    if (!currentSong) return;
+
+    setSavingLyrics(true);
+    try {
+      await axios.put(`${API}/songs/${currentSong.id}`, {
+        lyrics: editingLyrics
+      });
+      
+      // Update local state
+      const updatedSongs = [...songs];
+      updatedSongs[currentIndex] = { ...currentSong, lyrics: editingLyrics };
+      setSongs(updatedSongs);
+      
+      setEditMode(false);
+      setEditingLyrics("");
+      toast.success("Lyrics saved!");
+    } catch (error) {
+      console.error("Error saving lyrics:", error);
+      toast.error("Failed to save lyrics");
+    } finally {
+      setSavingLyrics(false);
+    }
+  };
+
+  // Save scroll settings for current song
+  const saveScrollSettings = async (speed, autoScroll) => {
+    const currentSong = songs[currentIndex];
+    if (!currentSong) return;
+
+    try {
+      await axios.put(`${API}/songs/${currentSong.id}`, {
+        scroll_speed: speed,
+        auto_scroll: autoScroll
+      });
+      
+      // Update local state
+      const updatedSongs = [...songs];
+      updatedSongs[currentIndex] = { 
+        ...currentSong, 
+        scroll_speed: speed,
+        auto_scroll: autoScroll 
+      };
+      setSongs(updatedSongs);
+    } catch (error) {
+      console.error("Error saving scroll settings:", error);
+    }
+  };
+
+  // Load song-specific scroll settings when song changes
+  useEffect(() => {
+    const currentSong = songs[currentIndex];
+    if (currentSong) {
+      // Load song-specific settings (with defaults)
+      setScrollSpeed(currentSong.scroll_speed ?? 1.0);
+      setAutoScrollEnabled(currentSong.auto_scroll ?? true);
+    }
+  }, [currentIndex, songs]);
+
+  // Debounced save for scroll speed changes
+  const handleScrollSpeedChange = (newSpeed) => {
+    setScrollSpeed(newSpeed);
+    // Save after a short delay to avoid too many API calls
+    clearTimeout(controlsTimeoutRef.current);
+    controlsTimeoutRef.current = setTimeout(() => {
+      saveScrollSettings(newSpeed, autoScrollEnabled);
+    }, 500);
+  };
+
+  // Save auto-scroll setting immediately when toggled
+  const handleAutoScrollToggle = () => {
+    const newValue = !autoScrollEnabled;
+    setAutoScrollEnabled(newValue);
+    saveScrollSettings(scrollSpeed, newValue);
+  };
+
   const handleSongDragStart = (e, index) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', index);
