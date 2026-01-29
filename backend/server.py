@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -11,7 +12,12 @@ import uuid
 from datetime import datetime, timezone
 import aiohttp
 import tempfile
+import shutil
 from emergentintegrations.llm.openai import OpenAISpeechToText
+
+# Audio files storage directory
+AUDIO_STORAGE_DIR = Path("/app/backend/audio_files")
+AUDIO_STORAGE_DIR.mkdir(exist_ok=True)
 
 
 ROOT_DIR = Path(__file__).parent
