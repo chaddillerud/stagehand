@@ -1,0 +1,192 @@
+<analysis>**original_problem_statement**: The user wants to build a set list maker and lyric teleprompter.
+
+**PRODUCT REQUIREMENTS**:
+- The application should be scrollable and editable.
+- Allow importing songs and setlists from  files.
+- The lyric prompter should be able to be popped out into a separate window.
+- The teleprompter needs controls for .
+- Display a performance countdown timer.
+- Songs in a setlist should be reorderable via drag-and-drop.
+- The teleprompter should show the real-time clock and an estimated set end time.
+- Display the total set time on the dashboard and setlist editor.
+- Support for Bluetooth foot pedals to control the teleprompter.
+- Implement lighting-adaptive themes (e.g., Savage Mode for high contrast).
+- Add a toggle for Landscape vs. Portrait mode in the teleprompter.
+- Allow users to double-click a song in the setlist view to open it in the editor.
+- Enable swipe gestures for next/previous song navigation on mobile devices.
+- Implement audio-to-lyric transcription using a URL or uploaded audio file (, ).
+- A lyric formatter tool to standardize spacing and handle chord notation.
+- Add font size controls to the teleprompter.
+- A print-friendly view for setlists.
+- A backup and restore functionality for all songs and setlists.
+- A field to add a URL to a song for practice (e.g., YouTube, Spotify link).
+
+**User's preferred language**: English
+
+**what currently exists?**
+A full-stack application with a React frontend, FastAPI backend, and MongoDB database. The application, named StageHand, allows users to create, manage, and edit songs and setlists. It features a sophisticated teleprompter with multiple control methods (keyboard, foot pedal, touch gestures), display modes, font sizing, and orientation settings. It also includes advanced features like audio transcription via OpenAI Whisper, a lyric formatting tool, and backup/restore capabilities.
+
+**Last working item**:
+-   **Last item agent was working**: The agent was working on two things simultaneously:
+    1.  Fixing the **auto-scroll** feature, which has been a persistent and frustrating bug for the user.
+    2.  Implementing a new feature request to add a **Song Link** field to each song, allowing users to link to an online version for practice.
+    The agent applied a new, more aggressive calculation for auto-scroll and added the necessary backend and frontend code for the song link feature.
+-   **Status**: IN PROGRESS
+-   **Agent Testing Done**: N
+-   **Which testing method agent to use?**: both
+-   **User Testing Done**: N
+
+**All Pending/In progress Issue list**:
+-   Issue 1: (P0) Auto-scroll is not working correctly.
+-   Issue 2: (P1) Lyric Formatter's Chords Inline mode has a visual bug.
+-   Issue 3: (P2) Deleting songs was reported as not working, but the agent's test passed.
+
+**Issues Detail**:
+-   **Issue 1**: Auto-scroll is not working correctly
+    -   **Attempted fixes**: The agent has tried multiple approaches: duration-based scrolling, tempo-based scrolling, increasing default speeds, and debugging React  dependencies and closure issues. The feature remains unreliable, either not scrolling at all or only at unusably high speeds.
+    -   **Next debug checklist**:
+        1.  Restart services and ensure the latest code for auto-scroll and the new song link feature is running.
+        2.  Create a test setlist containing songs that have valid  and  values.
+        3.  Open the teleprompter for this setlist and start the performance timer.
+        4.  Check the browser console for logs and the UI to see if scrolling occurs at a reasonable default speed.
+        5.  Test the speed slider to confirm it adjusts the scroll speed as expected.
+        6.  Review the  logic in  for flaws.
+    -   **Why fix this issue and what will be achieved with the fix?**: This is a core teleprompter feature and the most significant source of user frustration. Fixing it is critical for the app's usability.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Blocked on other issue**: None
+-   **Issue 2**: Lyric Formatter's Chords Inline mode has a visual bug
+    -   **Attempted fixes**: None. This was observed during a fix for a different bug in the same component.
+    -   **Next debug checklist**:
+        1.  In the Song Editor, use the FORMAT LYRICS tool on a song with chords.
+        2.  Select the Chords Inline option and observe the After preview.
+        3.  Confirm if the chords are placed on a new line instead of inline with the text (e.g., ).
+        4.  Debug the formatting logic in .
+    -   **Why fix this issue and what will be achieved with the fix?**: Ensures all options in the lyric formatter work as advertised, providing a complete and bug-free feature.
+    -   **Status**: NOT STARTED
+    -   **Is recurring issue?**: N
+    -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Blocked on other issue**: None
+-   **Issue 3**: Deleting songs was reported as not working, but the agent's test passed
+    -   **Attempted fixes**: The agent tested the backend endpoint via  and the frontend UI via screenshot, both of which succeeded. The issue might have been temporary or a misunderstanding.
+    -   **Next debug checklist**: This can be marked as resolved unless the user reports it again. If it recurs, a dedicated frontend test case should be created.
+    -   **Why fix this issue and what will be achieved with the fix?**: Ensures core CRUD functionality is reliable.
+    -   **Status**: USER VERIFICATION PENDING
+    -   **Is recurring issue?**: Y
+    -   **Should Test frontend/backend/both after fix?**: Frontend
+    -   **Blocked on other issue**: None
+
+**In progress Task List**:
+-   Task 1: (P0) Add Song Link for Practice
+
+**Task Detail**:
+-   **Task 1**: Add Song Link for Practice
+    -   **Where to resume**: The agent has already added the  field to the database, API, and all relevant frontend components (, , ). The task is ready for end-to-end testing.
+    -   **What will be achieved with this?**: Users will be able to store a URL for each song and open it from the setlist view, making it easy to practice along with a recording.
+    -   **Status**: IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?**: Both
+    -   **Blocked on something**: None
+
+**Upcoming and Future Tasks**:
+-   **Upcoming Tasks**:
+    -   (P0) Finalize and test the **Song Link** feature.
+-   **Future Tasks**:
+    -   (P1) **MIDI control integration**: A design proposal exists, but implementation was deferred by the user.
+    -   (P1) **Stage Notes Between Songs**: Display transition notes between songs in the teleprompter.
+    -   (P2) **Song Tags/Filters**: Allow users to tag songs and filter the song library.
+    -   (P3) **Timestamp-Based Auto-Scroll**: A more advanced auto-scroll mode that syncs with LRC-style timestamps in the lyrics.
+
+**Completed work in this session**
+-   **Setlist/Song Management**: Implemented drag-and-drop song reordering, double-click-to-edit, and total set time display.
+-   **Teleprompter Features**: Added a real-time clock, multiple control methods (foot pedal, keyboard, swipe), display themes, orientation toggle, font size controls, and a scrollable settings panel.
+-   **Audio & Lyrics**: Integrated an audio transcription feature (OpenAI Whisper) and built a lyric formatter tool to standardize chords and spacing.
+-   **General App Features**: Created a print-friendly view for setlists and a full backup/restore system.
+-   **UI/UX**: Refined the UI by making secondary action buttons more discrete and icon-only, improving the overall visual focus.
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1**: Lyric Formatter Chords Inline mode bug
+    -   **Debug checklist**: Check the  function in . The logic for  is likely placing the chord on a new line instead of immediately before the associated word.
+    -   **Why to solve this issue and what will be achieved with this?**: One of the four formatting options is buggy. Fixing it completes the feature and removes the inconsistency.
+    -   **Should Test frontend/backend/both after fix**: Frontend
+    -   **Is recurring issue?**: N
+
+**Known issue recurrence from previous fork**
+-   N/A
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Frontend**: React, React Router, Tailwind CSS, Shadcn UI, .
+-   **Backend**: FastAPI, Motor (async MongoDB driver).
+-   **Database**: MongoDB.
+-   **Integrations**: OpenAI Whisper via .
+
+**key DB schema**
+-   **songs**: 
+-   **setlists**: 
+
+**changes in tech stack**
+-   None
+
+**All files of reference**
+-   : Contains all API endpoints, database models, and business logic.
+-   : The core of the teleprompter feature; contains complex state and effect logic.
+-   : The main entry point for users, displaying song and setlist lists.
+-   : UI for managing songs within a setlist.
+-   : Form for creating and editing individual songs.
+-   : Component for standardizing lyric and chord formatting.
+-   : Component for the printer-friendly setlist view.
+
+**Areas that need refactoring**:
+-    has grown very large and complex. The state management and numerous  hooks are becoming difficult to maintain and debug. It should be refactored into smaller, more focused custom hooks (e.g., , ).
+
+**key api endpoints**
+-   : CRUD operations for songs.
+-   : CRUD operations for setlists.
+-   : Handles audio transcription requests.
+-   : Exports all database content.
+-   : Imports data from a backup file.
+
+**Critical Info for New Agent**
+-   The user is extremely frustrated with the **auto-scroll** feature. This is the highest priority issue to resolve. Previous attempts have failed, so a careful, step-by-step debugging approach is required. Do not assume previous logic was correct.
+-   The user prefers a clean and discrete UI, favoring icon-only buttons for secondary actions. Keep this design principle in mind for any new UI elements.
+-   MIDI integration has been discussed but explicitly postponed by the user. Do not work on this unless the user brings it up again.
+-   The agent's last action was to implement code for both the auto-scroll fix and the new song link feature. These changes have not been tested. The first step should be to test them thoroughly.
+
+**documents and test reports created in this job**
+-   
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  : User is frustrated with auto-scroll. (IN PROGRESS)
+2.  : User reports auto-scroll speed is wrong after a fix. (IN PROGRESS)
+3.  : User confirms auto-scroll is broken and suggests new logic. (IN PROGRESS)
+4.  : User reiterates auto-scroll is broken and requests a new song link feature. (IN PROGRESS)
+5.  : User postpones the MIDI feature. (DONE)
+6.  : User asks for feature suggestions. (DONE)
+7.  : User selects new features to implement. (DONE)
+8.  : User gives feedback on UI. (DONE)
+9.  : User requests more UI cleanup. (DONE)
+10. : User reports a bug. (USER VERIFICATION PENDING)
+
+**Project Health Check:**
+-   **Broken**: The auto-scroll feature is non-functional and is a major blocker for user satisfaction.
+-   **Mocked**: N/A
+
+**3rd Party Integrations**
+-   **OpenAI Whisper** — uses Emergent LLM Key
+
+**Testing status**
+-   **Testing agent used after significant changes**: YES
+-   **Troubleshoot agent used after agent stuck in loop**: NO
+-   **Test files created**: []
+-   **Known regressions**: The auto-scroll feature has repeatedly broken after attempted fixes.
+
+**Credentials to test flow:**
+-   N/A
+
+**What agent forgot to execute**
+-   The agent did not test the last set of changes made to fix the auto-scroll feature and implement the song link feature.
+-   The agent did not address the visual bug in the Lyric Formatter's Chords Inline mode, where chords are placed on a new line instead of being inline with the text.</analysis>
