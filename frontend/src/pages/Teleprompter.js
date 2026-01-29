@@ -33,7 +33,7 @@ export default function Teleprompter() {
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true); // Default ON
-  const [scrollSpeed, setScrollSpeed] = useState(1.5); // 1.5 = 150% (more visible by default)
+  const [scrollSpeed, setScrollSpeed] = useState(2.5); // 2.5 = 250% - more visible default
   const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
@@ -769,8 +769,8 @@ export default function Teleprompter() {
                 </div>
                 <input
                   type="range"
-                  min="0.5"
-                  max="3.0"
+                  min="1.0"
+                  max="5.0"
                   step="0.1"
                   value={scrollSpeed}
                   onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
@@ -778,12 +778,12 @@ export default function Teleprompter() {
                   data-testid="scroll-speed-slider"
                 />
                 <div className="flex justify-between text-xs text-zinc-600 mt-1">
-                  <span>50%</span>
-                  <span>150%</span>
-                  <span>300%</span>
+                  <span>100%</span>
+                  <span>250%</span>
+                  <span>500%</span>
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">
-                  💡 Default: 150% - Adjust based on song tempo
+                  💡 Default: 250% - Slower for reading, faster for timing
                   {!songs[currentIndex]?.duration && (
                     <div className="text-yellow-500 mt-1">⚠ Current song has no duration set</div>
                   )}
