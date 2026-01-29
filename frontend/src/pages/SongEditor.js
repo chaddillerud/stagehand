@@ -122,8 +122,7 @@ export default function SongEditor() {
       tempo,
       duration,
       notes,
-      lyrics,
-      link
+      lyrics
     };
 
     try {
