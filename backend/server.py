@@ -195,7 +195,7 @@ async def import_song(file: UploadFile = File(...)):
 # Audio file upload for practice mode
 @api_router.post("/songs/{song_id}/audio")
 async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
-    """Upload a practice audio file for a song"""
+    """Upload a practice audio file for a song and auto-extract duration"""
     
     # Check song exists
     song = await db.songs.find_one({"id": song_id}, {"_id": 0})
@@ -232,13 +232,33 @@ async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
     with open(audio_path, "wb") as f:
         f.write(content)
     
-    # Update song with audio file reference
-    await db.songs.update_one(
-        {"id": song_id},
-        {"$set": {"audio_file": audio_filename, "updated_at": datetime.now(timezone.utc).isoformat()}}
-    )
+    # Extract duration from audio file using mutagen
+    extracted_duration = None
+    try:
+        audio = AudioFile(str(audio_path))
+        if audio and audio.info:
+            duration_seconds = int(audio.info.length)
+            mins = duration_seconds // 60
+            secs = duration_seconds % 60
+            extracted_duration = f"{mins}:{secs:02d}"
+    except Exception as e:
+        logger.warning(f"Could not extract duration from audio: {e}")
     
-    return {"message": "Audio uploaded successfully", "audio_file": audio_filename}
+    # Update song with audio file reference and duration if extracted
+    update_data = {
+        "audio_file": audio_filename,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    if extracted_duration:
+        update_data["duration"] = extracted_duration
+    
+    await db.songs.update_one({"id": song_id}, {"$set": update_data})
+    
+    return {
+        "message": "Audio uploaded successfully",
+        "audio_file": audio_filename,
+        "duration": extracted_duration
+    }
 
 
 @api_router.delete("/songs/{song_id}/audio")
