@@ -1170,7 +1170,7 @@ export default function Teleprompter() {
               </div>
               <button
                 data-testid="auto-scroll-toggle"
-                onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                onClick={handleAutoScrollToggle}
                 className={`w-12 h-6 rounded-full transition-all relative ${
                   autoScrollEnabled ? 'bg-green-600' : 'bg-zinc-700'
                 }`}
@@ -1195,7 +1195,7 @@ export default function Teleprompter() {
                   max="3.0"
                   step="0.1"
                   value={scrollSpeed}
-                  onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
+                  onChange={(e) => handleScrollSpeedChange(parseFloat(e.target.value))}
                   className="w-full accent-yellow-400"
                   data-testid="scroll-speed-slider"
                 />
