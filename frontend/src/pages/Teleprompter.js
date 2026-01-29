@@ -576,7 +576,14 @@ export default function Teleprompter() {
     setCurrentIndex(0);
     setIsCountingIn(false);
     setCountInBeats(0);
+    setScrollPaused(false);
+    lastPauseMarkerRef.current = null;
     stopClickTrack();
+    // Clear any pending pause timeout
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
     // Reset scroll position
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
