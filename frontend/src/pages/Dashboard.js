@@ -111,51 +111,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleTranscribeAudio = async () => {
-    if (transcribeMode === 'file' && !audioFile) {
-      toast.error("Please select an audio file");
-      return;
-    }
-    if (transcribeMode === 'url' && !audioUrl.trim()) {
-      toast.error("Please enter an audio URL");
-      return;
-    }
-
-    setIsTranscribing(true);
-
-    try {
-      let response;
-      
-      if (transcribeMode === 'file') {
-        const formData = new FormData();
-        formData.append("file", audioFile);
-        
-        response = await axios.post(`${API}/songs/transcribe-audio`, formData, {
-          headers: { "Content-Type": "multipart/form-data" }
-        });
-      } else {
-        response = await axios.post(`${API}/songs/transcribe-url`, {
-          url: audioUrl,
-          song_name: transcribeSongName || undefined,
-          artist: transcribeArtist || undefined
-        });
-      }
-      
-      setSongs([...songs, response.data]);
-      setAudioFile(null);
-      setAudioUrl('');
-      setTranscribeSongName('');
-      setTranscribeArtist('');
-      setShowTranscribeModal(false);
-      setIsTranscribing(false);
-      toast.success("Audio transcribed! Song created with lyrics.");
-    } catch (error) {
-      console.error("Error transcribing audio:", error);
-      toast.error(error.response?.data?.detail || "Failed to transcribe audio");
-      setIsTranscribing(false);
-    }
-  };
-
   const createNewSong = () => {
     navigate("/song/new");
   };
