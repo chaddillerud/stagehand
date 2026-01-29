@@ -210,18 +210,19 @@ export default function Teleprompter() {
       return;
     }
 
-    // Base calculation: pixels per second based on duration
-    let pixelsPerSecond = totalScrollHeight / songDurationSeconds;
+    // Base calculation with AGGRESSIVE multiplier to make it actually visible
+    // Without this, the scroll is imperceptibly slow
+    const basePixelsPerSecond = (totalScrollHeight / songDurationSeconds) * 3.0; // 3x baseline
     
-    // Apply tempo adjustment if available
+    // Apply tempo adjustment if available (subtle adjustment only)
+    let pixelsPerSecond = basePixelsPerSecond;
     if (currentSong.tempo) {
       const bpm = parseInt(currentSong.tempo);
-      if (!isNaN(bpm) && bpm > 0) {
-        // Tempo multiplier: normalize around 120 BPM
-        // Slower songs (60 BPM) = 0.5x, Normal (120 BPM) = 1x, Fast (180 BPM) = 1.5x
-        const tempoMultiplier = bpm / 120;
+      if (!isNaN(bpm) && bpm > 0 && bpm < 300) {
+        // Subtle tempo adjustment: 80 BPM = 0.9x, 120 BPM = 1.0x, 160 BPM = 1.1x
+        const tempoMultiplier = 0.8 + (bpm / 400);
         pixelsPerSecond *= tempoMultiplier;
-        console.log(`Tempo adjustment: ${bpm} BPM = ${tempoMultiplier.toFixed(2)}x multiplier`);
+        console.log(`Tempo: ${bpm} BPM = ${tempoMultiplier.toFixed(2)}x`);
       }
     }
     
@@ -231,7 +232,7 @@ export default function Teleprompter() {
     const frameRate = 60;
     const pixelsPerFrame = pixelsPerSecond / frameRate;
 
-    console.log(`✅ AUTO-SCROLL: ${pixelsPerFrame.toFixed(3)}px/frame (${pixelsPerSecond.toFixed(1)}px/sec), ${totalScrollHeight}px total`);
+    console.log(`✅ AUTO-SCROLL: ${pixelsPerFrame.toFixed(2)}px/frame = ${pixelsPerSecond.toFixed(1)}px/sec`);
 
     // Start scrolling - use ref directly to avoid closure issues
     autoScrollIntervalRef.current = setInterval(() => {
