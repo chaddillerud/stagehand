@@ -1036,6 +1036,68 @@ export default function Teleprompter() {
             </div>
           </div>
 
+          {/* Click Track Settings */}
+          <div className="mb-4 pt-4 border-t border-zinc-800">
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
+              Click Track (Metronome)
+            </label>
+            
+            {/* Enable Click Track Toggle */}
+            <div className="flex items-center justify-between mb-3 p-3 bg-zinc-950 border border-zinc-800">
+              <div>
+                <div className="text-white font-bold text-sm">Enable Click Track</div>
+                <div className="text-xs text-zinc-500">
+                  {clickTrackEnabled ? 'Metronome plays with BPM' : 'No metronome'}
+                </div>
+              </div>
+              <button
+                data-testid="click-track-toggle"
+                onClick={() => setClickTrackEnabled(!clickTrackEnabled)}
+                className={`w-12 h-6 rounded-full transition-all relative ${
+                  clickTrackEnabled ? 'bg-green-600' : 'bg-zinc-700'
+                }`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${
+                  clickTrackEnabled ? 'right-0.5' : 'left-0.5'
+                }`} />
+              </button>
+            </div>
+
+            {/* Count-In Selection */}
+            {clickTrackEnabled && (
+              <div className="p-3 bg-zinc-950 border border-zinc-800">
+                <div className="text-sm text-white mb-2">Count-In</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { value: 'none', label: 'None' },
+                    { value: '4', label: '4 Beats' },
+                    { value: '8', label: '8 Beats' }
+                  ].map(option => (
+                    <button
+                      key={option.value}
+                      data-testid={`count-in-${option.value}`}
+                      onClick={() => setCountIn(option.value)}
+                      className={`py-2 px-3 text-xs font-mono transition-all border ${
+                        countIn === option.value
+                          ? 'border-yellow-400 bg-yellow-400/20 text-yellow-400'
+                          : 'border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="text-xs text-zinc-500 mt-2">
+                  {songs[currentIndex]?.tempo ? (
+                    <span className="text-green-500">✓ Current song: {songs[currentIndex].tempo} BPM</span>
+                  ) : (
+                    <span className="text-yellow-500">⚠ Current song has no BPM set</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Font Size Settings */}
           <div className="mb-4 pt-4 border-t border-zinc-800">
             <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-3">
