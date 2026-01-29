@@ -87,8 +87,7 @@ export default function Dashboard() {
     }
   };
 
-  const deleteSetList = async (id, e) => {
-    e.stopPropagation();
+  const deleteSetList = async (id) => {
     if (!window.confirm("Delete this set list?")) return;
 
     try {
