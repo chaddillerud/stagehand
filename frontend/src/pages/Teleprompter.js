@@ -267,6 +267,22 @@ export default function Teleprompter() {
     }
   }, [currentIndex]);
 
+  // Auto-play audio when song changes in practice mode
+  useEffect(() => {
+    if (!practiceMode || !audioRef.current || songs.length === 0) return;
+    
+    const currentSong = songs[currentIndex];
+    if (!currentSong?.audio_file) return;
+    
+    // If playing, auto-play the new song's audio
+    if (isPlaying) {
+      audioRef.current.play().catch(() => {});
+    }
+  }, [currentIndex, practiceMode, songs, isPlaying]);
+
+  // Count songs with audio for practice mode indicator
+  const songsWithAudio = songs.filter(s => s.audio_file).length;
+
   const loadSetList = async () => {
     try {
       const setlistRes = await axios.get(`${API}/setlists/${setlistId}`);
