@@ -249,18 +249,11 @@ export default function SetListEditor() {
                     {song.key && <span className="bg-zinc-800 px-2 py-1 border border-zinc-700">KEY: {song.key}</span>}
                     {song.tempo && <span className="bg-zinc-800 px-2 py-1 border border-zinc-700">BPM: {song.tempo}</span>}
                     {song.duration && <span className="bg-zinc-800 px-2 py-1 border border-zinc-700">DUR: {song.duration}</span>}
-                    {song.link && (
-                      <a
-                        href={song.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-blue-900 text-blue-300 hover:bg-blue-800 px-2 py-1 border border-blue-700 flex items-center gap-1 transition-colors"
-                        title="Play along"
-                      >
-                        <ExternalLink size={12} strokeWidth={1.5} />
-                        PLAY
-                      </a>
+                    {song.audio_file && (
+                      <span className="bg-green-900 text-green-300 px-2 py-1 border border-green-700 flex items-center gap-1" title="Has practice track">
+                        <Music size={12} strokeWidth={1.5} />
+                        AUDIO
+                      </span>
                     )}
                   </div>
 
