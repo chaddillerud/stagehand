@@ -23,6 +23,15 @@ Build a set list maker and lyric teleprompter for live performances. The app sho
 - [x] Double-click song to edit
 - [x] Print-friendly view
 - [x] AUDIO badge for songs with practice tracks
+- [x] Duplicate setlist functionality
+
+### Dashboard (Quick Wins - Jan 2026)
+- [x] StageHand logo with gradient icon (amber → violet)
+- [x] Search bar for filtering songs by title or artist
+- [x] Duplicate song button (appears on hover)
+- [x] Duplicate setlist button (appears on hover)
+- [x] Keyboard Shortcuts modal (? key or button)
+- [x] Logo in Song/SetList Editor back navigation
 
 ### Teleprompter
 - [x] Pop-out window
