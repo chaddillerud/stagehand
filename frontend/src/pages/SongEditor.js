@@ -437,6 +437,47 @@ export default function SongEditor() {
           onClose={() => setShowFormatter(false)}
         />
       )}
+
+      {/* Transcribe Confirmation Modal */}
+      {showTranscribeConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border-2 border-green-500 rounded-none p-8 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <Mic size={24} className="text-green-500" />
+              <h3 className="text-2xl font-oswald font-bold uppercase text-green-400">
+                Transcribe Lyrics?
+              </h3>
+            </div>
+            <p className="text-zinc-400 mb-6">
+              This song already has lyrics. Would you like to replace them with transcribed lyrics from the audio?
+            </p>
+            <div className="bg-zinc-950 border border-zinc-800 p-3 mb-6 text-sm">
+              <div className="text-zinc-500">Current lyrics preview:</div>
+              <div className="text-zinc-300 font-mono text-xs mt-2 max-h-20 overflow-hidden">
+                {lyrics.substring(0, 200)}{lyrics.length > 200 ? '...' : ''}
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <button
+                data-testid="transcribe-yes"
+                onClick={() => handleTranscribeConfirm(true)}
+                disabled={uploadingAudio}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all px-6 py-3 disabled:opacity-50"
+              >
+                {uploadingAudio ? 'Uploading...' : 'Yes, Transcribe'}
+              </button>
+              <button
+                data-testid="transcribe-no"
+                onClick={() => handleTranscribeConfirm(false)}
+                disabled={uploadingAudio}
+                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3 disabled:opacity-50"
+              >
+                {uploadingAudio ? 'Uploading...' : 'No, Keep Lyrics'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
