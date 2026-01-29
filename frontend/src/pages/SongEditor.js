@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Save, Trash2, Wand2, Upload, Music, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, Wand2, Upload, Music, X, Loader2, Mic } from "lucide-react";
 import { toast } from "sonner";
 import LyricFormatter from "../components/LyricFormatter";
 
@@ -13,6 +13,7 @@ export default function SongEditor() {
   const navigate = useNavigate();
   const isNew = id === 'new';
   const audioInputRef = useRef(null);
+  const pendingFileRef = useRef(null);
 
   const [name, setName] = useState("");
   const [artist, setArtist] = useState("");
@@ -25,6 +26,7 @@ export default function SongEditor() {
   const [loading, setLoading] = useState(!isNew);
   const [showFormatter, setShowFormatter] = useState(false);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [showTranscribeConfirm, setShowTranscribeConfirm] = useState(false);
 
   useEffect(() => {
     if (!isNew) {
