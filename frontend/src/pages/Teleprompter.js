@@ -168,6 +168,7 @@ export default function Teleprompter() {
   }, [isPlaying]);
 
   // Auto-scroll effect - Uses requestAnimationFrame with time-based accumulator
+  // Supports [Solo:30] style pause markers in lyrics
   useEffect(() => {
     // Clear any existing animation
     if (autoScrollIntervalRef.current) {
@@ -176,7 +177,7 @@ export default function Teleprompter() {
     }
 
     // Early exit conditions
-    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0) {
+    if (!autoScrollEnabled || !isPlaying || !lyricsRef.current || songs.length === 0 || scrollPaused) {
       return;
     }
 
@@ -195,6 +196,27 @@ export default function Teleprompter() {
       return 0;
     };
 
+    // Parse pause markers from lyrics - returns array of {text, seconds, lineIndex}
+    const parsePauseMarkers = (lyrics) => {
+      if (!lyrics) return [];
+      const markers = [];
+      const lines = lyrics.split('\n');
+      const markerRegex = /\[([^\]:]+):(\d+)\]/gi;
+      
+      lines.forEach((line, lineIndex) => {
+        let match;
+        while ((match = markerRegex.exec(line)) !== null) {
+          markers.push({
+            text: match[0],
+            label: match[1],
+            seconds: parseInt(match[2]),
+            lineIndex
+          });
+        }
+      });
+      return markers;
+    };
+
     const songDurationSeconds = parseDuration(currentSong.duration);
     const effectiveDuration = songDurationSeconds > 0 ? songDurationSeconds : 60;
     
@@ -206,11 +228,23 @@ export default function Teleprompter() {
       return; // Nothing to scroll
     }
 
+    // Parse pause markers
+    const pauseMarkers = parsePauseMarkers(currentSong.lyrics);
+    
+    // Calculate approximate scroll position for each marker based on line position
+    const lyricsLines = (currentSong.lyrics || '').split('\n').length;
+    const pixelsPerLine = totalScrollHeight / Math.max(lyricsLines, 1);
+    
+    const markerPositions = pauseMarkers.map(marker => ({
+      ...marker,
+      scrollPosition: marker.lineIndex * pixelsPerLine
+    }));
+
     // Calculate pixels per second based on song duration
     const basePixelsPerSecond = totalScrollHeight / effectiveDuration;
     const pixelsPerSecond = basePixelsPerSecond * scrollSpeed;
 
-    console.log(`🎵 AUTO-SCROLL ACTIVE: "${currentSong.name}" | Duration: ${effectiveDuration}s | Speed: ${Math.round(scrollSpeed * 100)}% | ${pixelsPerSecond.toFixed(1)}px/sec | Total scroll: ${totalScrollHeight}px`);
+    console.log(`🎵 AUTO-SCROLL: "${currentSong.name}" | ${pixelsPerSecond.toFixed(1)}px/sec | ${markerPositions.length} pause markers`);
 
     // Use requestAnimationFrame with time-based scrolling for accuracy
     let lastTime = performance.now();
@@ -225,6 +259,27 @@ export default function Teleprompter() {
 
       const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
       lastTime = currentTime;
+
+      // Check if we've hit a pause marker
+      const currentScroll = el.scrollTop;
+      for (const marker of markerPositions) {
+        // Check if we're within 5px of the marker and haven't already paused at it
+        if (Math.abs(currentScroll - marker.scrollPosition) < 5 && 
+            lastPauseMarkerRef.current !== `${currentIndex}-${marker.lineIndex}`) {
+          
+          console.log(`⏸️ PAUSE: [${marker.label}:${marker.seconds}] at line ${marker.lineIndex}`);
+          lastPauseMarkerRef.current = `${currentIndex}-${marker.lineIndex}`;
+          setScrollPaused(true);
+          
+          // Resume after specified seconds
+          pauseTimeoutRef.current = setTimeout(() => {
+            console.log(`▶️ RESUME after ${marker.seconds}s pause`);
+            setScrollPaused(false);
+          }, marker.seconds * 1000);
+          
+          return; // Stop scrolling
+        }
+      }
 
       // Accumulate scroll amount
       accumulatedScroll += pixelsPerSecond * deltaTime;
@@ -252,8 +307,12 @@ export default function Teleprompter() {
         cancelAnimationFrame(autoScrollIntervalRef.current);
         autoScrollIntervalRef.current = null;
       }
+      if (pauseTimeoutRef.current) {
+        clearTimeout(pauseTimeoutRef.current);
+        pauseTimeoutRef.current = null;
+      }
     };
-  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs]);
+  }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs, scrollPaused]);
 
   useEffect(() => {
     // Calculate total time for set list
