@@ -193,6 +193,113 @@ async def import_song(file: UploadFile = File(...)):
     song_data = SongCreate(name=name, artist=artist, lyrics=lyrics)
     return await create_song(song_data)
 
+
+# Audio file upload for practice mode
+@api_router.post("/songs/{song_id}/audio")
+async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
+    """Upload a practice audio file for a song"""
+    
+    # Check song exists
+    song = await db.songs.find_one({"id": song_id}, {"_id": 0})
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+    
+    # Validate file type
+    allowed_extensions = ['.mp3', '.wav', '.m4a', '.mp4', '.ogg', '.flac', '.aac']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type. Allowed: {', '.join(allowed_extensions)}"
+        )
+    
+    # Read file content
+    content = await file.read()
+    
+    # Check file size (50MB limit for practice tracks)
+    if len(content) > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size: 50MB")
+    
+    # Delete old audio file if exists
+    if song.get('audio_file'):
+        old_path = AUDIO_STORAGE_DIR / song['audio_file']
+        if old_path.exists():
+            old_path.unlink()
+    
+    # Generate unique filename
+    audio_filename = f"{song_id}_{uuid.uuid4().hex[:8]}{file_ext}"
+    audio_path = AUDIO_STORAGE_DIR / audio_filename
+    
+    # Save file
+    with open(audio_path, "wb") as f:
+        f.write(content)
+    
+    # Update song with audio file reference
+    await db.songs.update_one(
+        {"id": song_id},
+        {"$set": {"audio_file": audio_filename, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Audio uploaded successfully", "audio_file": audio_filename}
+
+
+@api_router.delete("/songs/{song_id}/audio")
+async def delete_song_audio(song_id: str):
+    """Delete a song's practice audio file"""
+    
+    song = await db.songs.find_one({"id": song_id}, {"_id": 0})
+    if not song:
+        raise HTTPException(status_code=404, detail="Song not found")
+    
+    if not song.get('audio_file'):
+        raise HTTPException(status_code=404, detail="No audio file to delete")
+    
+    # Delete file
+    audio_path = AUDIO_STORAGE_DIR / song['audio_file']
+    if audio_path.exists():
+        audio_path.unlink()
+    
+    # Update song
+    await db.songs.update_one(
+        {"id": song_id},
+        {"$set": {"audio_file": "", "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Audio deleted successfully"}
+
+
+@api_router.get("/audio/{filename}")
+async def get_audio_file(filename: str):
+    """Stream an audio file"""
+    
+    # Validate filename (prevent path traversal)
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    
+    audio_path = AUDIO_STORAGE_DIR / filename
+    
+    if not audio_path.exists():
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    # Determine media type
+    ext = audio_path.suffix.lower()
+    media_types = {
+        '.mp3': 'audio/mpeg',
+        '.wav': 'audio/wav',
+        '.m4a': 'audio/mp4',
+        '.mp4': 'audio/mp4',
+        '.ogg': 'audio/ogg',
+        '.flac': 'audio/flac',
+        '.aac': 'audio/aac'
+    }
+    media_type = media_types.get(ext, 'audio/mpeg')
+    
+    return FileResponse(
+        path=audio_path,
+        media_type=media_type,
+        filename=filename
+    )
+
 @api_router.post("/songs/transcribe-audio", status_code=201)
 async def transcribe_audio(file: UploadFile = File(...)):
     """Transcribe audio file (.mp3, .wav, etc.) to lyrics using OpenAI Whisper"""
