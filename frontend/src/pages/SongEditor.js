@@ -201,9 +201,9 @@ export default function SongEditor() {
           <button
             data-testid="back-to-dashboard-from-song"
             onClick={() => navigate('/')}
-            className="text-zinc-400 hover:text-white transition-colors mb-4 flex items-center gap-2 text-sm"
+            className="text-zinc-400 hover:text-white transition-colors mb-6 flex items-center gap-2 text-sm group"
           >
-            <ArrowLeft size={18} strokeWidth={1.5} />
+            <ArrowLeft size={18} strokeWidth={1.5} className="group-hover:-translate-x-1 transition-transform" />
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-gradient-to-br from-amber-500 to-violet-600 rounded flex items-center justify-center">
                 <Music size={14} className="text-white" strokeWidth={2.5} />
@@ -212,121 +212,137 @@ export default function SongEditor() {
             </div>
           </button>
 
-          <h1 className="text-4xl md:text-6xl font-oswald font-bold tracking-tighter uppercase text-yellow-400 mb-6">
-            {isNew ? 'New Song' : 'Edit Song'}
-          </h1>
-
-          <div className="flex gap-4">
-            <button
-              data-testid="save-song-btn"
-              onClick={saveSong}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
-            >
-              <Save size={20} strokeWidth={2.5} />
-              {isNew ? 'Create Song' : 'Save Changes'}
-            </button>
-            {!isNew && (
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-oswald font-bold tracking-tight text-white mb-2">
+                {isNew ? 'Create New Song' : name || 'Edit Song'}
+              </h1>
+              {!isNew && artist && (
+                <p className="text-zinc-500 text-lg">{artist}</p>
+              )}
+            </div>
+            
+            <div className="flex gap-3">
               <button
-                data-testid="delete-song-btn"
-                onClick={deleteSong}
-                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+                data-testid="save-song-btn"
+                onClick={saveSong}
+                className="btn-primary rounded-lg px-5 py-2.5 flex items-center gap-2 font-oswald uppercase tracking-wider text-sm"
               >
-                <Trash2 size={20} strokeWidth={1.5} />
-                Delete Song
+                <Save size={18} strokeWidth={2} />
+                {isNew ? 'Create' : 'Save'}
               </button>
-            )}
+              {!isNew && (
+                <button
+                  data-testid="delete-song-btn"
+                  onClick={deleteSong}
+                  className="bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg px-4 py-2.5 flex items-center gap-2 font-oswald uppercase tracking-wider text-sm transition-all"
+                >
+                  <Trash2 size={18} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Form */}
-        <div className="space-y-6">
-          {/* Song Name */}
-          <div>
-            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-              Song Name *
-            </label>
-            <input
-              data-testid="song-name-input"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter song name"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
-            />
+        <div className="space-y-8">
+          {/* Basic Info Card */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+            <h2 className="text-sm font-oswald uppercase tracking-wider text-zinc-500 mb-5 flex items-center gap-2">
+              <Music size={14} />
+              Song Details
+            </h2>
+            
+            <div className="space-y-5">
+              {/* Song Name */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-2">
+                  Song Name <span className="text-amber-500">*</span>
+                </label>
+                <input
+                  data-testid="song-name-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter song name"
+                  className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white text-lg placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all"
+                />
+              </div>
+
+              {/* Artist */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-2">
+                  Artist
+                </label>
+                <input
+                  data-testid="song-artist-input"
+                  type="text"
+                  value={artist}
+                  onChange={(e) => setArtist(e.target.value)}
+                  placeholder="Enter artist name"
+                  className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all"
+                />
+              </div>
+
+              {/* Key, Tempo, Duration */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-2">
+                    Key
+                  </label>
+                  <input
+                    data-testid="song-key-input"
+                    type="text"
+                    value={songKey}
+                    onChange={(e) => setSongKey(e.target.value)}
+                    placeholder="C, Am, F#"
+                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all text-center font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-2">
+                    BPM
+                  </label>
+                  <input
+                    data-testid="song-tempo-input"
+                    type="text"
+                    value={tempo}
+                    onChange={(e) => setTempo(e.target.value)}
+                    placeholder="120"
+                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all text-center font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-zinc-400 mb-2">
+                    Duration
+                  </label>
+                  <input
+                    data-testid="song-duration-input"
+                    type="text"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    placeholder="3:45"
+                    className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all text-center font-mono"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Artist */}
-          <div>
-            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-              Artist
-            </label>
-            <input
-              data-testid="song-artist-input"
-              type="text"
-              value={artist}
-              onChange={(e) => setArtist(e.target.value)}
-              placeholder="Enter artist name"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
-            />
-          </div>
-
-          {/* Key, Tempo, Duration */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-                Key
-              </label>
-              <input
-                data-testid="song-key-input"
-                type="text"
-                value={songKey}
-                onChange={(e) => setSongKey(e.target.value)}
-                placeholder="e.g. C, Am, F#"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-                Tempo (BPM)
-              </label>
-              <input
-                data-testid="song-tempo-input"
-                type="text"
-                value={tempo}
-                onChange={(e) => setTempo(e.target.value)}
-                placeholder="e.g. 120"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-                Duration
-              </label>
-              <input
-                data-testid="song-duration-input"
-                type="text"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g. 3:45"
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
-              Notes
-            </label>
+          {/* Notes Card */}
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6">
+            <h2 className="text-sm font-oswald uppercase tracking-wider text-zinc-500 mb-4">
+              Performance Notes
+            </h2>
             <textarea
               data-testid="song-notes-input"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes, reminders, or special instructions..."
+              placeholder="Add any notes, reminders, or special instructions for this song..."
               rows={3}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none resize-none"
+              className="w-full bg-zinc-950/50 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none transition-all resize-none"
             />
           </div>
 
