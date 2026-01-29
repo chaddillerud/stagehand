@@ -544,7 +544,7 @@ export default function Dashboard() {
                       </button>
                       <button
                         data-testid={`delete-song-${song.id}`}
-                        onClick={(e) => deleteSong(song.id, e)}
+                        onClick={(e) => { e.stopPropagation(); deleteSong(song.id, song.name); }}
                         title="Delete"
                         className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
                       >
