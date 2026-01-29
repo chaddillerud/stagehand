@@ -373,6 +373,14 @@ export default function Dashboard() {
                 <Upload size={18} strokeWidth={1.5} />
               </button>
               <button
+                data-testid="create-song-from-audio-btn"
+                onClick={() => setShowAudioSongModal(true)}
+                className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              >
+                <Mic size={20} strokeWidth={2.5} />
+                From Audio
+              </button>
+              <button
                 data-testid="create-song-btn"
                 onClick={createNewSong}
                 className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
