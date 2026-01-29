@@ -42,6 +42,10 @@ export default function Teleprompter() {
   const [footPedalConnected, setFootPedalConnected] = useState(false);
   const [practiceMode, setPracticeMode] = useState(false); // Practice mode with audio playback
   const [audioMuted, setAudioMuted] = useState(false);
+  const [clickTrackEnabled, setClickTrackEnabled] = useState(false); // Click track / metronome
+  const [countIn, setCountIn] = useState('none'); // none, 4, 8 beats
+  const [isCountingIn, setIsCountingIn] = useState(false);
+  const [countInBeats, setCountInBeats] = useState(0);
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const clockRef = useRef(null);
@@ -51,6 +55,8 @@ export default function Teleprompter() {
   const touchStartY = useRef(null);
   const autoScrollIntervalRef = useRef(null);
   const audioRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const clickIntervalRef = useRef(null);
 
   useEffect(() => {
     loadSetList();
