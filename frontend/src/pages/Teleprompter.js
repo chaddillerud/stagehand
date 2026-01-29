@@ -46,6 +46,7 @@ export default function Teleprompter() {
   const [countIn, setCountIn] = useState('none'); // none, 4, 8 beats
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeats, setCountInBeats] = useState(0);
+  const [scrollPaused, setScrollPaused] = useState(false); // For [Solo:30] style pauses
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const clockRef = useRef(null);
@@ -57,6 +58,8 @@ export default function Teleprompter() {
   const audioRef = useRef(null);
   const audioContextRef = useRef(null);
   const clickIntervalRef = useRef(null);
+  const pauseTimeoutRef = useRef(null);
+  const lastPauseMarkerRef = useRef(null); // Track which marker we last paused at
 
   useEffect(() => {
     loadSetList();
