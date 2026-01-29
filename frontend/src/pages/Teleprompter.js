@@ -716,48 +716,48 @@ export default function Teleprompter() {
     }
   };
 
-  // Save scroll settings for current song
-  const saveScrollSettings = async (speed, autoScroll) => {
-    const currentSong = songs[currentIndex];
-    if (!currentSong) return;
+  // Save scroll settings for current song (immediate save, no debounce)
+  const saveScrollSettings = async (songId, speed, autoScroll) => {
+    if (!songId) return;
 
     try {
-      await axios.put(`${API}/songs/${currentSong.id}`, {
+      await axios.put(`${API}/songs/${songId}`, {
         scroll_speed: speed,
         auto_scroll: autoScroll
       });
       
-      // Update local state
-      const updatedSongs = [...songs];
-      updatedSongs[currentIndex] = { 
-        ...currentSong, 
-        scroll_speed: speed,
-        auto_scroll: autoScroll 
-      };
-      setSongs(updatedSongs);
+      // Update local state - find song by ID to handle index changes
+      setSongs(prevSongs => prevSongs.map(s => 
+        s.id === songId 
+          ? { ...s, scroll_speed: speed, auto_scroll: autoScroll }
+          : s
+      ));
     } catch (error) {
       console.error("Error saving scroll settings:", error);
     }
   };
 
-  // Load song-specific scroll settings when song changes
+  // Track which song's settings we've loaded to avoid reloading on every render
+  const loadedSongIdRef = useRef(null);
+
+  // Load song-specific scroll settings ONLY when switching to a different song
   useEffect(() => {
     const currentSong = songs[currentIndex];
-    if (currentSong) {
+    if (currentSong && currentSong.id !== loadedSongIdRef.current) {
+      loadedSongIdRef.current = currentSong.id;
       // Load song-specific settings (with defaults)
       setScrollSpeed(currentSong.scroll_speed ?? 1.0);
       setAutoScrollEnabled(currentSong.auto_scroll ?? true);
     }
   }, [currentIndex, songs]);
 
-  // Debounced save for scroll speed changes
+  // Save scroll speed immediately when changed
   const handleScrollSpeedChange = (newSpeed) => {
     setScrollSpeed(newSpeed);
-    // Save after a short delay to avoid too many API calls
-    clearTimeout(controlsTimeoutRef.current);
-    controlsTimeoutRef.current = setTimeout(() => {
-      saveScrollSettings(newSpeed, autoScrollEnabled);
-    }, 500);
+    const currentSong = songs[currentIndex];
+    if (currentSong) {
+      saveScrollSettings(currentSong.id, newSpeed, autoScrollEnabled);
+    }
   };
 
   // Save auto-scroll setting immediately when toggled
