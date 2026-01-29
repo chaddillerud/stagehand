@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Plus, Music, Trash2, Upload, Download, FileJson, Mic, Loader2 } from "lucide-react";
+import { Plus, Music, Trash2, Upload, Download, FileJson, Mic, Loader2, Search, Copy, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [showNewSetListModal, setShowNewSetListModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAudioSongModal, setShowAudioSongModal] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
   const [isCreatingFromAudio, setIsCreatingFromAudio] = useState(false);
   const [newSetListName, setNewSetListName] = useState("");
@@ -21,6 +22,29 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [restoreFile, setRestoreFile] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '?' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        setShowShortcutsModal(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Filter songs by search query
+  const filteredSongs = songs.filter(song => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      song.name?.toLowerCase().includes(query) ||
+      song.artist?.toLowerCase().includes(query)
+    );
+  });
 
   useEffect(() => {
     loadData();
