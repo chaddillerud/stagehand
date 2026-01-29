@@ -43,7 +43,6 @@ export default function SongEditor() {
       setDuration(song.duration || "");
       setNotes(song.notes || "");
       setLyrics(song.lyrics || "");
-      setLink(song.link || "");
       setAudioFile(song.audio_file || "");
       setLoading(false);
     } catch (error) {
