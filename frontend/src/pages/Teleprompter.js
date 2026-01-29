@@ -317,16 +317,13 @@ export default function Teleprompter() {
     // Start the animation loop
     autoScrollIntervalRef.current = requestAnimationFrame(scrollStep);
 
-    // Cleanup
+    // Cleanup - only cancel animation frame, NOT the pause timeout
     return () => {
       if (autoScrollIntervalRef.current) {
         cancelAnimationFrame(autoScrollIntervalRef.current);
         autoScrollIntervalRef.current = null;
       }
-      if (pauseTimeoutRef.current) {
-        clearTimeout(pauseTimeoutRef.current);
-        pauseTimeoutRef.current = null;
-      }
+      // Don't clear pauseTimeoutRef here - let the resume timeout complete
     };
   }, [isPlaying, autoScrollEnabled, currentIndex, scrollSpeed, songs, scrollPaused]);
 
