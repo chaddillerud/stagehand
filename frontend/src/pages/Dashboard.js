@@ -173,6 +173,42 @@ export default function Dashboard() {
     navigate("/song/new");
   };
 
+  const duplicateSong = async (song) => {
+    try {
+      const newSong = {
+        name: `${song.name} (Copy)`,
+        artist: song.artist || "",
+        key: song.key || "",
+        tempo: song.tempo || "",
+        duration: song.duration || "",
+        notes: song.notes || "",
+        lyrics: song.lyrics || "",
+        scroll_speed: song.scroll_speed || 1.0,
+        auto_scroll: song.auto_scroll ?? true
+      };
+      const response = await axios.post(`${API}/songs`, newSong);
+      setSongs([...songs, response.data]);
+      toast.success(`Duplicated "${song.name}"`);
+    } catch (error) {
+      console.error("Error duplicating song:", error);
+      toast.error("Failed to duplicate song");
+    }
+  };
+
+  const duplicateSetlist = async (setlist) => {
+    try {
+      const response = await axios.post(`${API}/setlists`, {
+        name: `${setlist.name} (Copy)`,
+        song_ids: setlist.song_ids || []
+      });
+      setSetlists([...setlists, response.data]);
+      toast.success(`Duplicated "${setlist.name}"`);
+    } catch (error) {
+      console.error("Error duplicating setlist:", error);
+      toast.error("Failed to duplicate setlist");
+    }
+  };
+
   const exportBackup = async () => {
     try {
       const [setlistsRes, songsRes] = await Promise.all([
