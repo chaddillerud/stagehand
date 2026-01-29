@@ -1020,41 +1020,88 @@ export default function Teleprompter() {
               {currentSong.tempo && <span>BPM: {currentSong.tempo}</span>}
               {currentSong.duration && <span>DUR: {currentSong.duration}</span>}
             </div>
-          </div>
-
-          {/* Lyrics */}
-          <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap break-words hyphens-auto`}>
-            {currentSong.lyrics ? (
-              // Render lyrics with highlighted pause markers
-              currentSong.lyrics.split(/(\[[^\]:]+:\d+\])/gi).map((part, index) => {
-                // Check if this part is a pause marker
-                if (/^\[[^\]:]+:\d+\]$/i.test(part)) {
-                  return (
-                    <span 
-                      key={index} 
-                      className="text-yellow-400 bg-yellow-400/20 px-2 py-0.5 rounded"
-                    >
-                      {part}
-                    </span>
-                  );
-                }
-                return <span key={index}>{part}</span>;
-              })
-            ) : (
-              <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
+            
+            {/* Edit Lyrics Button */}
+            {!editMode && (
+              <button
+                data-testid="edit-lyrics-btn"
+                onClick={startEditing}
+                className="text-zinc-500 hover:text-yellow-400 transition-colors p-1"
+                title="Edit lyrics"
+              >
+                <Edit3 size={16} strokeWidth={1.5} />
+              </button>
             )}
           </div>
 
-          {/* Notes */}
-          {currentSong.notes && (
-            <div className={`mt-8 p-6 ${displayMode === 'daylight' ? 'bg-zinc-100 border-2 border-zinc-300' : 'bg-zinc-900/50 border border-zinc-800'}`}>
-              <div className={`text-sm font-oswald uppercase tracking-wider ${styles.accent} mb-2`}>
-                Notes:
-              </div>
-              <div className={`text-lg ${styles.secondaryText} whitespace-pre-wrap`}>
-                {currentSong.notes}
+          {/* Lyrics - View or Edit Mode */}
+          {editMode ? (
+            <div className="flex flex-col h-full">
+              <textarea
+                value={editingLyrics}
+                onChange={(e) => setEditingLyrics(e.target.value)}
+                className={`flex-1 w-full bg-zinc-950 border-2 border-yellow-400 p-4 font-mono ${orientStyles.lyrics} leading-snug resize-none focus:outline-none ${styles.text}`}
+                placeholder="Enter lyrics... Use [Solo:8] for 8-bar pause markers"
+                autoFocus
+              />
+              <div className="flex gap-2 mt-4">
+                <button
+                  data-testid="save-lyrics-btn"
+                  onClick={saveLyrics}
+                  disabled={savingLyrics}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-oswald uppercase tracking-wider py-3 px-4 transition-colors disabled:opacity-50"
+                >
+                  <Save size={18} />
+                  {savingLyrics ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  data-testid="cancel-edit-btn"
+                  onClick={cancelEditing}
+                  disabled={savingLyrics}
+                  className="flex-1 flex items-center justify-center gap-2 bg-zinc-700 hover:bg-zinc-600 text-white font-oswald uppercase tracking-wider py-3 px-4 transition-colors disabled:opacity-50"
+                >
+                  <XCircle size={18} />
+                  Cancel
+                </button>
               </div>
             </div>
+          ) : (
+            <>
+              {/* Lyrics Display */}
+              <div className={`${orientStyles.lyrics} font-mono font-bold leading-snug whitespace-pre-wrap break-words hyphens-auto`}>
+                {currentSong.lyrics ? (
+                  // Render lyrics with highlighted pause markers
+                  currentSong.lyrics.split(/(\[[^\]:]+:\d+\])/gi).map((part, index) => {
+                    // Check if this part is a pause marker
+                    if (/^\[[^\]:]+:\d+\]$/i.test(part)) {
+                      return (
+                        <span 
+                          key={index} 
+                          className="text-yellow-400 bg-yellow-400/20 px-2 py-0.5 rounded"
+                        >
+                          {part}
+                        </span>
+                      );
+                    }
+                    return <span key={index}>{part}</span>;
+                  })
+                ) : (
+                  <div className={`${displayMode === 'daylight' ? 'text-zinc-300' : 'text-zinc-700'} italic`}>No lyrics available</div>
+                )}
+              </div>
+
+              {/* Notes */}
+              {currentSong.notes && (
+                <div className={`mt-8 p-6 ${displayMode === 'daylight' ? 'bg-zinc-100 border-2 border-zinc-300' : 'bg-zinc-900/50 border border-zinc-800'}`}>
+                  <div className={`text-sm font-oswald uppercase tracking-wider ${styles.accent} mb-2`}>
+                    Notes:
+                  </div>
+                  <div className={`text-lg ${styles.secondaryText} whitespace-pre-wrap`}>
+                    {currentSong.notes}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
