@@ -336,31 +336,45 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen p-4 md:p-8 lg:p-12">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Logo */}
         <div className="mb-12">
-          <div className="flex items-end justify-between">
-            <div>
-              <h1 className="text-5xl md:text-7xl font-oswald font-bold tracking-tighter uppercase text-yellow-400 mb-2">
-                StageHand
-              </h1>
-              <p className="text-zinc-400 text-lg">Your savage setlist maker & lyric teleprompter</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Logo */}
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-violet-600 rounded-lg flex items-center justify-center">
+                <Music size={28} className="text-white" strokeWidth={2.5} />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-oswald font-bold tracking-tight">
+                  <span className="brand-gradient">STAGEHAND</span>
+                </h1>
+                <p className="text-zinc-500 text-sm">Setlist Maker & Lyric Teleprompter</p>
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3">
+              <button
+                data-testid="shortcuts-btn"
+                onClick={() => setShowShortcutsModal(true)}
+                title="Keyboard shortcuts (?)"
+                className="text-zinc-500 hover:text-amber-400 transition-colors p-2"
+              >
+                <HelpCircle size={20} strokeWidth={1.5} />
+              </button>
               <button
                 data-testid="export-backup-btn"
                 onClick={exportBackup}
                 title="Backup all data"
-                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
+                className="text-zinc-500 hover:text-white transition-colors p-2"
               >
-                <Download size={18} strokeWidth={1.5} />
+                <Download size={20} strokeWidth={1.5} />
               </button>
               <button
                 data-testid="import-restore-btn"
                 onClick={() => setShowRestoreModal(true)}
                 title="Restore from backup"
-                className="rounded-none bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700 p-2 transition-colors"
+                className="text-zinc-500 hover:text-white transition-colors p-2"
               >
-                <Upload size={18} strokeWidth={1.5} />
+                <Upload size={20} strokeWidth={1.5} />
               </button>
             </div>
           </div>
@@ -369,35 +383,59 @@ export default function Dashboard() {
         {/* Set Lists Section */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl md:text-5xl font-oswald font-bold tracking-tight uppercase text-white">
+            <h2 className="text-2xl md:text-3xl font-oswald font-semibold tracking-tight text-white">
               Set Lists
             </h2>
             <button
               data-testid="create-setlist-btn"
               onClick={() => setShowNewSetListModal(true)}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center gap-2"
+              className="btn-primary rounded-lg px-5 py-2.5 flex items-center gap-2 font-oswald uppercase tracking-wider text-sm"
             >
-              <Plus size={20} strokeWidth={2.5} />
+              <Plus size={18} strokeWidth={2.5} />
               New Set List
             </button>
           </div>
 
           {setlists.length === 0 ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-none p-12 text-center">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-12 text-center">
               <Music size={48} className="mx-auto mb-4 text-zinc-700" strokeWidth={1.5} />
-              <p className="text-zinc-500 text-lg">No set lists yet. Create one to get started!</p>
+              <p className="text-zinc-500">No set lists yet. Create one to get started!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {setlists.map((setlist) => (
                 <div
                   key={setlist.id}
                   data-testid={`setlist-card-${setlist.id}`}
-                  onClick={() => navigate(`/setlist/${setlist.id}`)}
-                  className="bg-zinc-900 border border-zinc-800 rounded-none p-6 hover:border-yellow-400/50 transition-all cursor-pointer group relative overflow-hidden hover:shadow-[4px_4px_0px_0px_rgba(250,204,21,1)]"
+                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 hover:border-amber-500/50 transition-all cursor-pointer group relative"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-xl font-bold text-white group-hover:text-yellow-400 transition-colors">
+                  <div className="flex items-start justify-between mb-3" onClick={() => navigate(`/setlist/${setlist.id}`)}>
+                    <h3 className="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors flex-1">
+                      {setlist.name}
+                    </h3>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-sm text-zinc-500" onClick={() => navigate(`/setlist/${setlist.id}`)}>
+                      <span>{setlist.song_ids?.length || 0} songs</span>
+                      <span>•</span>
+                      <span>{calculateTotalTime(setlist.song_ids || [])}</span>
+                    </div>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        data-testid={`duplicate-setlist-${setlist.id}`}
+                        onClick={(e) => { e.stopPropagation(); duplicateSetlist(setlist); }}
+                        title="Duplicate"
+                        className="text-zinc-500 hover:text-violet-400 p-1.5 transition-colors"
+                      >
+                        <Copy size={16} strokeWidth={1.5} />
+                      </button>
+                      <button
+                        data-testid={`delete-setlist-${setlist.id}`}
+                        onClick={(e) => { e.stopPropagation(); deleteSetlist(setlist.id); }}
+                        title="Delete"
+                        className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
+                      >
+                        <Trash2 size={16} strokeWidth={1.5} />
                       {setlist.name}
                     </h3>
                     <button
