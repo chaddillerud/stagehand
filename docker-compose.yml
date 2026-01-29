@@ -19,8 +19,9 @@ services:
     environment:
       - MONGO_URL=mongodb://mongodb:27017
       - DB_NAME=stagehand
-      # Add your OpenAI/Emergent key here for transcription
-      # - OPENAI_API_KEY=your-key-here
+      - CORS_ORIGINS=*
+      # Add your Emergent LLM Key here for audio transcription
+      - EMERGENT_LLM_KEY=${EMERGENT_LLM_KEY:-}
     volumes:
       - audio_uploads:/app/uploads
     depends_on:
