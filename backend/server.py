@@ -14,6 +14,7 @@ import aiohttp
 import tempfile
 import shutil
 from emergentintegrations.llm.openai import OpenAISpeechToText
+from mutagen import File as AudioFile
 
 # Audio files storage directory
 AUDIO_STORAGE_DIR = Path("/app/backend/audio_files")
@@ -47,7 +48,6 @@ class Song(BaseModel):
     duration: str = ""
     notes: str = ""
     lyrics: str = ""
-    link: str = ""  # URL to online version
     audio_file: str = ""  # Path to uploaded practice audio file
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -60,7 +60,6 @@ class SongCreate(BaseModel):
     duration: Optional[str] = ""
     notes: Optional[str] = ""
     lyrics: Optional[str] = ""
-    link: Optional[str] = ""  # URL to Spotify, YouTube, etc.
     audio_file: Optional[str] = ""
 
 class SongUpdate(BaseModel):
@@ -71,7 +70,6 @@ class SongUpdate(BaseModel):
     duration: Optional[str] = None
     notes: Optional[str] = None
     lyrics: Optional[str] = None
-    link: Optional[str] = None
     audio_file: Optional[str] = None
 
 class SetList(BaseModel):
