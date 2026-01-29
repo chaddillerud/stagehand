@@ -793,6 +793,20 @@ export default function Teleprompter() {
         </div>
       </div>
 
+      {/* Count-In Overlay */}
+      {isCountingIn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
+          <div className="text-center">
+            <div className="text-9xl font-mono font-bold text-yellow-400 animate-pulse">
+              {countInBeats}
+            </div>
+            <div className="text-2xl text-zinc-400 font-oswald uppercase tracking-wider mt-4">
+              Count In
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lyrics Display - Scrollable */}
       <div 
         ref={lyricsRef}
