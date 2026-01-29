@@ -21,7 +21,6 @@ export default function SongEditor() {
   const [duration, setDuration] = useState("");
   const [notes, setNotes] = useState("");
   const [lyrics, setLyrics] = useState("");
-  const [link, setLink] = useState("");
   const [audioFile, setAudioFile] = useState("");
   const [loading, setLoading] = useState(!isNew);
   const [showFormatter, setShowFormatter] = useState(false);
