@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Plus, Music, Trash2, Edit, Upload, Download, FileJson } from "lucide-react";
+import { Plus, Music, Trash2, Upload, Download, FileJson } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -13,15 +13,8 @@ export default function Dashboard() {
   const [songs, setSongs] = useState([]);
   const [showNewSetListModal, setShowNewSetListModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [showTranscribeModal, setShowTranscribeModal] = useState(false);
-  const [transcribeMode, setTranscribeMode] = useState('file'); // 'file' or 'url'
-  const [audioUrl, setAudioUrl] = useState('');
-  const [transcribeSongName, setTranscribeSongName] = useState('');
-  const [transcribeArtist, setTranscribeArtist] = useState('');
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [newSetListName, setNewSetListName] = useState("");
   const [importFile, setImportFile] = useState(null);
-  const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [restoreFile, setRestoreFile] = useState(null);
