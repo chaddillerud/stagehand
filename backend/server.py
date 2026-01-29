@@ -192,10 +192,10 @@ async def import_song(file: UploadFile = File(...)):
     return await create_song(song_data)
 
 
-# Audio file upload for practice mode
+# Audio file upload for practice mode with optional transcription
 @api_router.post("/songs/{song_id}/audio")
-async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
-    """Upload a practice audio file for a song and auto-extract duration"""
+async def upload_song_audio(song_id: str, transcribe: bool = False, file: UploadFile = File(...)):
+    """Upload a practice audio file for a song, extract duration, and optionally transcribe to lyrics"""
     
     # Check song exists
     song = await db.songs.find_one({"id": song_id}, {"_id": 0})
@@ -244,6 +244,16 @@ async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
     except Exception as e:
         logger.warning(f"Could not extract duration from audio: {e}")
     
+    # Transcribe audio if requested
+    transcribed_lyrics = None
+    if transcribe:
+        try:
+            stt = OpenAISpeechToText()
+            transcribed_lyrics = await stt.transcribe_audio(str(audio_path))
+            logger.info(f"Transcribed audio for song {song_id}")
+        except Exception as e:
+            logger.warning(f"Could not transcribe audio: {e}")
+    
     # Update song with audio file reference and duration if extracted
     update_data = {
         "audio_file": audio_filename,
@@ -251,13 +261,16 @@ async def upload_song_audio(song_id: str, file: UploadFile = File(...)):
     }
     if extracted_duration:
         update_data["duration"] = extracted_duration
+    if transcribed_lyrics:
+        update_data["lyrics"] = transcribed_lyrics
     
     await db.songs.update_one({"id": song_id}, {"$set": update_data})
     
     return {
         "message": "Audio uploaded successfully",
         "audio_file": audio_filename,
-        "duration": extracted_duration
+        "duration": extracted_duration,
+        "lyrics": transcribed_lyrics
     }
 
 
