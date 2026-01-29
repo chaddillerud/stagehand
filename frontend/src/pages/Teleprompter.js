@@ -544,6 +544,8 @@ export default function Teleprompter() {
     // Reset state
     setElapsedTime(0);
     setCurrentIndex(0);
+    setScrollPaused(false);
+    lastPauseMarkerRef.current = null;
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
     }
