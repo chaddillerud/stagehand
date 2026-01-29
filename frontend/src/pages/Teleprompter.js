@@ -168,7 +168,7 @@ export default function Teleprompter() {
   }, [isPlaying]);
 
   // Auto-scroll effect - Uses requestAnimationFrame with time-based accumulator
-  // Supports [Solo:30] style pause markers in lyrics
+  // Supports [Solo:8] style pause markers (bars) in lyrics
   useEffect(() => {
     // Clear any existing animation
     if (autoScrollIntervalRef.current) {
@@ -196,7 +196,16 @@ export default function Teleprompter() {
       return 0;
     };
 
-    // Parse pause markers from lyrics - returns array of {text, seconds, lineIndex}
+    // Get BPM for bar calculations
+    const bpm = currentSong.tempo ? parseInt(currentSong.tempo) : 0;
+    
+    // Convert bars to seconds: bars × 4 beats × (60 / BPM)
+    const barsToSeconds = (bars) => {
+      if (bpm <= 0) return 0;
+      return bars * 4 * (60 / bpm);
+    };
+
+    // Parse pause markers from lyrics - returns array of {text, bars, seconds, lineIndex}
     const parsePauseMarkers = (lyrics) => {
       if (!lyrics) return [];
       const markers = [];
@@ -206,12 +215,17 @@ export default function Teleprompter() {
       lines.forEach((line, lineIndex) => {
         let match;
         while ((match = markerRegex.exec(line)) !== null) {
-          markers.push({
-            text: match[0],
-            label: match[1],
-            seconds: parseInt(match[2]),
-            lineIndex
-          });
+          const bars = parseInt(match[2]);
+          const seconds = barsToSeconds(bars);
+          if (seconds > 0) {
+            markers.push({
+              text: match[0],
+              label: match[1],
+              bars,
+              seconds,
+              lineIndex
+            });
+          }
         }
       });
       return markers;
@@ -244,7 +258,9 @@ export default function Teleprompter() {
     const basePixelsPerSecond = totalScrollHeight / effectiveDuration;
     const pixelsPerSecond = basePixelsPerSecond * scrollSpeed;
 
-    console.log(`🎵 AUTO-SCROLL: "${currentSong.name}" | ${pixelsPerSecond.toFixed(1)}px/sec | ${markerPositions.length} pause markers`);
+    if (pauseMarkers.length > 0) {
+      console.log(`🎵 AUTO-SCROLL: "${currentSong.name}" | BPM: ${bpm} | ${pauseMarkers.length} pause markers`);
+    }
 
     // Use requestAnimationFrame with time-based scrolling for accuracy
     let lastTime = performance.now();
@@ -267,13 +283,13 @@ export default function Teleprompter() {
         if (Math.abs(currentScroll - marker.scrollPosition) < 5 && 
             lastPauseMarkerRef.current !== `${currentIndex}-${marker.lineIndex}`) {
           
-          console.log(`⏸️ PAUSE: [${marker.label}:${marker.seconds}] at line ${marker.lineIndex}`);
+          console.log(`⏸️ PAUSE: [${marker.label}:${marker.bars}] = ${marker.seconds.toFixed(1)}s at line ${marker.lineIndex}`);
           lastPauseMarkerRef.current = `${currentIndex}-${marker.lineIndex}`;
           setScrollPaused(true);
           
-          // Resume after specified seconds
+          // Resume after calculated seconds
           pauseTimeoutRef.current = setTimeout(() => {
-            console.log(`▶️ RESUME after ${marker.seconds}s pause`);
+            console.log(`▶️ RESUME after ${marker.bars} bars (${marker.seconds.toFixed(1)}s)`);
             setScrollPaused(false);
           }, marker.seconds * 1000);
           
