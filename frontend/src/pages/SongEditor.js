@@ -201,10 +201,15 @@ export default function SongEditor() {
           <button
             data-testid="back-to-dashboard-from-song"
             onClick={() => navigate('/')}
-            className="text-zinc-400 hover:text-white transition-colors mb-4 flex items-center gap-2 font-oswald uppercase text-sm"
+            className="text-zinc-400 hover:text-white transition-colors mb-4 flex items-center gap-2 text-sm"
           >
             <ArrowLeft size={18} strokeWidth={1.5} />
-            Back to Dashboard
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gradient-to-br from-amber-500 to-violet-600 rounded flex items-center justify-center">
+                <Music size={14} className="text-white" strokeWidth={2.5} />
+              </div>
+              <span className="font-oswald uppercase tracking-wider">StageHand</span>
+            </div>
           </button>
 
           <h1 className="text-4xl md:text-6xl font-oswald font-bold tracking-tighter uppercase text-yellow-400 mb-6">
