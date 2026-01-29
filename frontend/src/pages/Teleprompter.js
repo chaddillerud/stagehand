@@ -217,14 +217,13 @@ export default function Teleprompter() {
 
     console.log(`✅ AUTO-SCROLL ACTIVE: ${pixelsPerFrame.toFixed(3)}px/frame, ${totalScrollHeight}px over ${songDurationSeconds}s`);
 
-    // Start scrolling
+    // Start scrolling - use ref directly to avoid closure issues
     autoScrollIntervalRef.current = setInterval(() => {
-      const container = lyricsRef.current;
-      if (!container) return;
+      if (!lyricsRef.current) return;
       
-      const maxScroll = container.scrollHeight - container.clientHeight;
-      if (container.scrollTop < maxScroll) {
-        container.scrollTop += pixelsPerFrame;
+      const maxScroll = lyricsRef.current.scrollHeight - lyricsRef.current.clientHeight;
+      if (lyricsRef.current.scrollTop < maxScroll) {
+        lyricsRef.current.scrollTop += pixelsPerFrame;
       }
     }, 1000 / frameRate);
 
