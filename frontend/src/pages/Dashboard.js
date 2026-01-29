@@ -100,14 +100,13 @@ export default function Dashboard() {
     }
   };
 
-  const deleteSong = async (id, e) => {
-    e.stopPropagation();
-    if (!window.confirm("Delete this song?")) return;
+  const deleteSong = async (id, name) => {
+    if (!window.confirm(`Delete "${name}"?`)) return;
 
     try {
       await axios.delete(`${API}/songs/${id}`);
       setSongs(songs.filter(s => s.id !== id));
-      toast.success("Song deleted");
+      toast.success(`"${name}" deleted`);
     } catch (error) {
       console.error("Error deleting song:", error);
       toast.error("Failed to delete song");
