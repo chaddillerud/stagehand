@@ -467,17 +467,38 @@ export default function Teleprompter() {
   };
 
   const start = () => {
-    setIsPlaying(true);
+    const currentSong = songs[0];
+    const bpm = currentSong?.tempo ? parseInt(currentSong.tempo) : 0;
+    
+    // Determine count-in beats
+    const countInBeatsNum = countIn === '4' ? 4 : countIn === '8' ? 8 : 0;
+    
+    // Reset state
     setElapsedTime(0);
     setCurrentIndex(0);
-    // Reset scroll position
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
     }
-    // Play audio if practice mode enabled
-    if (practiceMode && audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
+    
+    // If count-in is enabled and we have BPM, do count-in first
+    if (countInBeatsNum > 0 && bpm > 0 && clickTrackEnabled) {
+      doCountIn(bpm, countInBeatsNum, () => {
+        // After count-in, start playing
+        setIsPlaying(true);
+        // Play audio if practice mode enabled
+        if (practiceMode && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(() => {});
+        }
+      });
+    } else {
+      // No count-in, start immediately
+      setIsPlaying(true);
+      // Play audio if practice mode enabled
+      if (practiceMode && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
     }
   };
 
@@ -485,6 +506,9 @@ export default function Teleprompter() {
     setIsPlaying(false);
     setElapsedTime(0);
     setCurrentIndex(0);
+    setIsCountingIn(false);
+    setCountInBeats(0);
+    stopClickTrack();
     // Reset scroll position
     if (lyricsRef.current) {
       lyricsRef.current.scrollTop = 0;
@@ -497,6 +521,8 @@ export default function Teleprompter() {
   };
 
   const togglePlayPause = () => {
+    if (isCountingIn) return; // Don't allow pause during count-in
+    
     const newIsPlaying = !isPlaying;
     setIsPlaying(newIsPlaying);
     
