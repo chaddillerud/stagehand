@@ -48,6 +48,7 @@ class Song(BaseModel):
     notes: str = ""
     lyrics: str = ""
     link: str = ""  # URL to online version
+    audio_file: str = ""  # Path to uploaded practice audio file
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -60,6 +61,7 @@ class SongCreate(BaseModel):
     notes: Optional[str] = ""
     lyrics: Optional[str] = ""
     link: Optional[str] = ""  # URL to Spotify, YouTube, etc.
+    audio_file: Optional[str] = ""
 
 class SongUpdate(BaseModel):
     name: Optional[str] = None
@@ -70,6 +72,7 @@ class SongUpdate(BaseModel):
     notes: Optional[str] = None
     lyrics: Optional[str] = None
     link: Optional[str] = None
+    audio_file: Optional[str] = None
 
 class SetList(BaseModel):
     model_config = ConfigDict(extra="ignore")
