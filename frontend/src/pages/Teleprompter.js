@@ -14,7 +14,10 @@ import {
   Bluetooth,
   X,
   Monitor,
-  Smartphone
+  Smartphone,
+  Music,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -37,6 +40,8 @@ export default function Teleprompter() {
   const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
+  const [practiceMode, setPracticeMode] = useState(false); // Practice mode with audio playback
+  const [audioMuted, setAudioMuted] = useState(false);
   const timerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
   const clockRef = useRef(null);
@@ -45,6 +50,7 @@ export default function Teleprompter() {
   const touchStartX = useRef(null);
   const touchStartY = useRef(null);
   const autoScrollIntervalRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     loadSetList();
