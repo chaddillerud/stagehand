@@ -430,7 +430,7 @@ export default function Dashboard() {
                       </button>
                       <button
                         data-testid={`delete-setlist-${setlist.id}`}
-                        onClick={(e) => { e.stopPropagation(); deleteSetList(setlist.id, e); }}
+                        onClick={(e) => { e.stopPropagation(); deleteSetList(setlist.id); }}
                         title="Delete"
                         className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
                       >
