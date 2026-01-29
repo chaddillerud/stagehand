@@ -982,6 +982,66 @@ export default function Teleprompter() {
             <Settings size={24} strokeWidth={1.5} />
           </button>
         </div>
+
+        {/* Quick Controls Bar - Scroll Speed & Practice Mode */}
+        <div className={`flex items-center gap-6 mt-3 pt-3 border-t border-zinc-800 ${showControls ? '' : 'hidden'}`}>
+          {/* Scroll Speed */}
+          <div className="flex items-center gap-3 flex-1">
+            <span className="text-xs font-oswald uppercase tracking-wider text-zinc-500 whitespace-nowrap">
+              Scroll
+            </span>
+            <input
+              type="range"
+              min="0.5"
+              max="3.0"
+              step="0.1"
+              value={scrollSpeed}
+              onChange={(e) => handleScrollSpeedChange(parseFloat(e.target.value))}
+              className="flex-1 accent-yellow-400 h-2"
+              data-testid="scroll-speed-slider-main"
+            />
+            <span className="text-sm font-mono font-bold text-yellow-400 w-14 text-right">
+              {Math.round(scrollSpeed * 100)}%
+            </span>
+          </div>
+
+          {/* Practice Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <Music size={16} className={practiceMode ? 'text-green-500' : 'text-zinc-600'} />
+            <span className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
+              Practice
+            </span>
+            <button
+              data-testid="practice-mode-toggle-main"
+              onClick={() => setPracticeMode(!practiceMode)}
+              className={`w-10 h-5 rounded-full transition-all relative ${
+                practiceMode ? 'bg-green-600' : 'bg-zinc-700'
+              }`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all ${
+                practiceMode ? 'right-0.5' : 'left-0.5'
+              }`} />
+            </button>
+          </div>
+
+          {/* Auto-Scroll Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
+              Auto
+            </span>
+            <button
+              data-testid="auto-scroll-toggle-main"
+              onClick={handleAutoScrollToggle}
+              className={`w-10 h-5 rounded-full transition-all relative ${
+                autoScrollEnabled ? 'bg-green-600' : 'bg-zinc-700'
+              }`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all ${
+                autoScrollEnabled ? 'right-0.5' : 'left-0.5'
+              }`} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Count-In Overlay */}
