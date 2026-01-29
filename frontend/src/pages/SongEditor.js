@@ -71,18 +71,40 @@ export default function SongEditor() {
       return;
     }
 
+    // If song already has lyrics, ask if user wants to transcribe
+    if (lyrics.trim()) {
+      pendingFileRef.current = file;
+      setShowTranscribeConfirm(true);
+    } else {
+      // No existing lyrics - transcribe by default
+      await doAudioUpload(file, true);
+    }
+  };
+
+  const doAudioUpload = async (file, shouldTranscribe) => {
     setUploadingAudio(true);
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await axios.post(`${API}/songs/${id}/audio`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await axios.post(
+        `${API}/songs/${id}/audio?transcribe=${shouldTranscribe}`, 
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+      
       setAudioFile(response.data.audio_file);
+      
       // Update duration if extracted from audio
       if (response.data.duration) {
         setDuration(response.data.duration);
+      }
+      
+      // Update lyrics if transcribed
+      if (response.data.lyrics) {
+        setLyrics(response.data.lyrics);
+        toast.success(`Practice track uploaded! Duration: ${response.data.duration || 'N/A'} | Lyrics transcribed!`);
+      } else if (response.data.duration) {
         toast.success(`Practice track uploaded! Duration: ${response.data.duration}`);
       } else {
         toast.success("Practice track uploaded!");
@@ -92,9 +114,17 @@ export default function SongEditor() {
       toast.error(error.response?.data?.detail || "Failed to upload audio");
     } finally {
       setUploadingAudio(false);
+      pendingFileRef.current = null;
       if (audioInputRef.current) {
         audioInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleTranscribeConfirm = async (shouldTranscribe) => {
+    setShowTranscribeConfirm(false);
+    if (pendingFileRef.current) {
+      await doAudioUpload(pendingFileRef.current, shouldTranscribe);
     }
   };
 
