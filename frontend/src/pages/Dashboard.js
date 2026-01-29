@@ -513,9 +513,10 @@ export default function Dashboard() {
                 <div
                   key={song.id}
                   data-testid={`song-card-${song.id}`}
+                  onClick={() => navigate(`/song/${song.id}`)}
                   className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 hover:border-amber-500/50 transition-all cursor-pointer group relative"
                 >
-                  <div className="flex items-start justify-between mb-3" onClick={() => navigate(`/song/${song.id}`)}>
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors">
                         {song.name}
@@ -526,7 +527,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex gap-3 text-xs font-mono text-zinc-600" onClick={() => navigate(`/song/${song.id}`)}>
+                    <div className="flex gap-3 text-xs font-mono text-zinc-600">
                       {song.key && <span>KEY: {song.key}</span>}
                       {song.tempo && <span>BPM: {song.tempo}</span>}
                       {song.duration && <span>{song.duration}</span>}
@@ -534,22 +535,22 @@ export default function Dashboard() {
                         <span className="text-emerald-500" title="Has practice track">♪</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
                       <button
                         data-testid={`duplicate-song-${song.id}`}
-                        onClick={(e) => { e.stopPropagation(); duplicateSong(song); }}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); duplicateSong(song); }}
                         title="Duplicate"
-                        className="text-zinc-500 hover:text-violet-400 p-1.5 transition-colors"
+                        className="text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 p-2 rounded-lg transition-colors"
                       >
-                        <Copy size={16} strokeWidth={1.5} />
+                        <Copy size={18} strokeWidth={1.5} />
                       </button>
                       <button
                         data-testid={`delete-song-${song.id}`}
-                        onClick={(e) => { e.stopPropagation(); deleteSong(song.id, song.name); }}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); deleteSong(song.id, song.name); }}
                         title="Delete"
-                        className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
+                        className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
                       >
-                        <Trash2 size={16} strokeWidth={1.5} />
+                        <Trash2 size={18} strokeWidth={1.5} />
                       </button>
                     </div>
                   </div>
