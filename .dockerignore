@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+frontend/build
+frontend/.cache
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.venv
+venv
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (will be set in docker-compose)
+.env
+*.env.local
+
+# Test files
+test_reports
+*.test.js
+*.spec.js
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+.emergent
+memory

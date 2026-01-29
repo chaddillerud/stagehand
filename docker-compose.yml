@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: stagehand-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - stagehand-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stagehand-backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017
+      - DB_NAME=stagehand
+      # Add your OpenAI/Emergent key here for transcription
+      # - OPENAI_API_KEY=your-key-here
+    volumes:
+      - audio_uploads:/app/uploads
+    depends_on:
+      - mongodb
+    networks:
+      - stagehand-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_BACKEND_URL=
+    container_name: stagehand-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - stagehand-network
+
+volumes:
+  mongodb_data:
+  audio_uploads:
+
+networks:
+  stagehand-network:
+    driver: bridge
