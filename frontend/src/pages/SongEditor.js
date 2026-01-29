@@ -20,6 +20,7 @@ export default function SongEditor() {
   const [duration, setDuration] = useState("");
   const [notes, setNotes] = useState("");
   const [lyrics, setLyrics] = useState("");
+  const [link, setLink] = useState("");
   const [loading, setLoading] = useState(!isNew);
   const [showFormatter, setShowFormatter] = useState(false);
 
@@ -40,6 +41,7 @@ export default function SongEditor() {
       setDuration(song.duration || "");
       setNotes(song.notes || "");
       setLyrics(song.lyrics || "");
+      setLink(song.link || "");
       setLoading(false);
     } catch (error) {
       console.error("Error loading song:", error);
@@ -61,7 +63,8 @@ export default function SongEditor() {
       tempo,
       duration,
       notes,
-      lyrics
+      lyrics,
+      link
     };
 
     try {
@@ -230,6 +233,24 @@ export default function SongEditor() {
               rows={3}
               className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none resize-none"
             />
+          </div>
+
+          {/* Song Link */}
+          <div>
+            <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
+              Practice Link (Spotify, YouTube, etc.)
+            </label>
+            <input
+              data-testid="song-link-input"
+              type="url"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="https://open.spotify.com/track/... or YouTube URL"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none"
+            />
+            <p className="text-xs text-zinc-500 mt-1">
+              Add Spotify, YouTube, or any link to play along during practice
+            </p>
           </div>
 
           {/* Lyrics */}
