@@ -772,12 +772,11 @@ export default function Teleprompter() {
                   <span>300%</span>
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">
-                  💡 100% = Baseline (auto-adjusts for tempo)
-                  {!songs[currentIndex]?.duration && (
-                    <div className="text-yellow-500 mt-1">⚠ Current song has no duration set</div>
-                  )}
-                  {songs[currentIndex]?.tempo && (
-                    <div className="text-green-500 mt-1">✓ Using tempo: {songs[currentIndex].tempo} BPM</div>
+                  💡 100% = Scroll finishes with song duration
+                  {songs[currentIndex]?.duration ? (
+                    <div className="text-green-500 mt-1">✓ Using duration: {songs[currentIndex].duration}</div>
+                  ) : (
+                    <div className="text-yellow-500 mt-1">⚠ No duration set (using 60s default)</div>
                   )}
                 </div>
               </div>
