@@ -405,35 +405,36 @@ export default function Dashboard() {
                 <div
                   key={setlist.id}
                   data-testid={`setlist-card-${setlist.id}`}
+                  onClick={() => navigate(`/setlist/${setlist.id}`)}
                   className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-5 hover:border-amber-500/50 transition-all cursor-pointer group relative"
                 >
-                  <div className="flex items-start justify-between mb-3" onClick={() => navigate(`/setlist/${setlist.id}`)}>
+                  <div className="flex items-start justify-between mb-3">
                     <h3 className="text-lg font-semibold text-white group-hover:text-amber-400 transition-colors flex-1">
                       {setlist.name}
                     </h3>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-sm text-zinc-500" onClick={() => navigate(`/setlist/${setlist.id}`)}>
+                    <div className="flex items-center gap-3 text-sm text-zinc-500">
                       <span>{setlist.song_ids?.length || 0} songs</span>
                       <span>•</span>
                       <span>{calculateTotalTime(setlist.song_ids || [])}</span>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
                       <button
                         data-testid={`duplicate-setlist-${setlist.id}`}
-                        onClick={(e) => { e.stopPropagation(); duplicateSetlist(setlist); }}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); duplicateSetlist(setlist); }}
                         title="Duplicate"
-                        className="text-zinc-500 hover:text-violet-400 p-1.5 transition-colors"
+                        className="text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 p-2 rounded-lg transition-colors"
                       >
-                        <Copy size={16} strokeWidth={1.5} />
+                        <Copy size={18} strokeWidth={1.5} />
                       </button>
                       <button
                         data-testid={`delete-setlist-${setlist.id}`}
-                        onClick={(e) => { e.stopPropagation(); deleteSetList(setlist.id, setlist.name); }}
+                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); deleteSetList(setlist.id, setlist.name); }}
                         title="Delete"
-                        className="text-zinc-500 hover:text-red-400 p-1.5 transition-colors"
+                        className="text-zinc-500 hover:text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors"
                       >
-                        <Trash2 size={16} strokeWidth={1.5} />
+                        <Trash2 size={18} strokeWidth={1.5} />
                       </button>
                     </div>
                   </div>
