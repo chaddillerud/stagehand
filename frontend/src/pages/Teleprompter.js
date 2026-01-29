@@ -33,7 +33,7 @@ export default function Teleprompter() {
   const [displayMode, setDisplayMode] = useState('default'); // default, high-contrast, stage-red, daylight
   const [orientation, setOrientation] = useState('landscape'); // landscape, portrait
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true); // Default ON
-  const [scrollSpeed, setScrollSpeed] = useState(2.5); // 2.5 = 250% - more visible default
+  const [scrollSpeed, setScrollSpeed] = useState(1.0); // 1.0 = 100% baseline
   const [fontSize, setFontSize] = useState('large'); // small, medium, large, xlarge
   const [showSettings, setShowSettings] = useState(false);
   const [footPedalConnected, setFootPedalConnected] = useState(false);
@@ -210,12 +210,28 @@ export default function Teleprompter() {
       return;
     }
 
-    // Pixels per second adjusted by speed multiplier
-    const pixelsPerSecond = (totalScrollHeight / songDurationSeconds) * scrollSpeed;
+    // Base calculation: pixels per second based on duration
+    let pixelsPerSecond = totalScrollHeight / songDurationSeconds;
+    
+    // Apply tempo adjustment if available
+    if (currentSong.tempo) {
+      const bpm = parseInt(currentSong.tempo);
+      if (!isNaN(bpm) && bpm > 0) {
+        // Tempo multiplier: normalize around 120 BPM
+        // Slower songs (60 BPM) = 0.5x, Normal (120 BPM) = 1x, Fast (180 BPM) = 1.5x
+        const tempoMultiplier = bpm / 120;
+        pixelsPerSecond *= tempoMultiplier;
+        console.log(`Tempo adjustment: ${bpm} BPM = ${tempoMultiplier.toFixed(2)}x multiplier`);
+      }
+    }
+    
+    // Apply user speed adjustment
+    pixelsPerSecond *= scrollSpeed;
+    
     const frameRate = 60;
     const pixelsPerFrame = pixelsPerSecond / frameRate;
 
-    console.log(`✅ AUTO-SCROLL ACTIVE: ${pixelsPerFrame.toFixed(3)}px/frame, ${totalScrollHeight}px over ${songDurationSeconds}s`);
+    console.log(`✅ AUTO-SCROLL: ${pixelsPerFrame.toFixed(3)}px/frame (${pixelsPerSecond.toFixed(1)}px/sec), ${totalScrollHeight}px total`);
 
     // Start scrolling - use ref directly to avoid closure issues
     autoScrollIntervalRef.current = setInterval(() => {
@@ -768,8 +784,8 @@ export default function Teleprompter() {
                 </div>
                 <input
                   type="range"
-                  min="1.0"
-                  max="5.0"
+                  min="0.5"
+                  max="3.0"
                   step="0.1"
                   value={scrollSpeed}
                   onChange={(e) => setScrollSpeed(parseFloat(e.target.value))}
@@ -777,14 +793,17 @@ export default function Teleprompter() {
                   data-testid="scroll-speed-slider"
                 />
                 <div className="flex justify-between text-xs text-zinc-600 mt-1">
+                  <span>50%</span>
                   <span>100%</span>
-                  <span>250%</span>
-                  <span>500%</span>
+                  <span>300%</span>
                 </div>
                 <div className="text-xs text-zinc-500 mt-2">
-                  💡 Default: 250% - Slower for reading, faster for timing
+                  💡 100% = Baseline (auto-adjusts for tempo)
                   {!songs[currentIndex]?.duration && (
                     <div className="text-yellow-500 mt-1">⚠ Current song has no duration set</div>
+                  )}
+                  {songs[currentIndex]?.tempo && (
+                    <div className="text-green-500 mt-1">✓ Using tempo: {songs[currentIndex].tempo} BPM</div>
                   )}
                 </div>
               </div>
