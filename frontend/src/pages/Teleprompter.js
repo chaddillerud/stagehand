@@ -764,7 +764,10 @@ export default function Teleprompter() {
   const handleAutoScrollToggle = () => {
     const newValue = !autoScrollEnabled;
     setAutoScrollEnabled(newValue);
-    saveScrollSettings(scrollSpeed, newValue);
+    const currentSong = songs[currentIndex];
+    if (currentSong) {
+      saveScrollSettings(currentSong.id, scrollSpeed, newValue);
+    }
   };
 
   const handleSongDragStart = (e, index) => {
