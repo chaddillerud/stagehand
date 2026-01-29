@@ -308,6 +308,76 @@ export default function SongEditor() {
             </p>
           </div>
 
+          {/* Practice Track Upload */}
+          {!isNew && (
+            <div>
+              <label className="block text-sm font-oswald uppercase tracking-wider text-zinc-400 mb-2">
+                Practice Track (MP3)
+              </label>
+              
+              {audioFile ? (
+                <div className="bg-zinc-950 border border-zinc-800 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <Music size={20} className="text-green-500" />
+                      <div>
+                        <div className="text-white font-mono text-sm">Practice track uploaded</div>
+                        <div className="text-xs text-zinc-500">{audioFile}</div>
+                      </div>
+                    </div>
+                    <button
+                      data-testid="delete-audio-btn"
+                      onClick={handleDeleteAudio}
+                      className="text-zinc-500 hover:text-red-500 transition-colors"
+                      title="Remove audio"
+                    >
+                      <X size={20} strokeWidth={1.5} />
+                    </button>
+                  </div>
+                  <audio
+                    controls
+                    className="w-full h-10"
+                    src={`${API}/audio/${audioFile}`}
+                  >
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+              ) : (
+                <div className="bg-zinc-950 border border-zinc-800 border-dashed p-6 text-center">
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept=".mp3,.wav,.m4a,.ogg,.flac,.aac,audio/*"
+                    onChange={handleAudioUpload}
+                    className="hidden"
+                    id="audio-upload"
+                    data-testid="audio-upload-input"
+                  />
+                  <label
+                    htmlFor="audio-upload"
+                    className={`cursor-pointer flex flex-col items-center gap-2 ${uploadingAudio ? 'pointer-events-none opacity-50' : ''}`}
+                  >
+                    {uploadingAudio ? (
+                      <>
+                        <Loader2 size={32} className="text-yellow-400 animate-spin" />
+                        <span className="text-zinc-400 font-mono text-sm">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={32} className="text-zinc-600" />
+                        <span className="text-zinc-400 font-mono text-sm">Click to upload practice track</span>
+                        <span className="text-xs text-zinc-600">MP3, WAV, M4A, OGG, FLAC (max 50MB)</span>
+                      </>
+                    )}
+                  </label>
+                </div>
+              )}
+              <p className="text-xs text-zinc-500 mt-1">
+                Upload your own recording for Practice Mode in the teleprompter
+              </p>
+            </div>
+          )}
+
           {/* Lyrics */}
           <div>
             <div className="flex items-center justify-between mb-2">
