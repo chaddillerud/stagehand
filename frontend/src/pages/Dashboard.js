@@ -88,8 +88,6 @@ export default function Dashboard() {
   };
 
   const deleteSetList = async (id, name) => {
-    console.log("DELETE CLICKED:", id, name);
-    alert(`About to delete: ${name}`);
     if (!window.confirm(`Delete "${name}"?`)) return;
 
     try {
