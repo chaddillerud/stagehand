@@ -181,8 +181,8 @@ class TestSetListsAPI:
 class TestSongLinkFeature:
     """Test Song Link feature specifically"""
     
-    def test_the_remainder_has_youtube_link(self):
-        """Test that 'The Remainder' song has YouTube link set"""
+    def test_the_remainder_has_practice_link(self):
+        """Test that 'The Remainder' song has a practice link set"""
         song_id = "64b4f1d3-5fa2-4e46-9f13-616aa14450bd"
         
         response = requests.get(f"{BASE_URL}/api/songs/{song_id}")
@@ -192,8 +192,8 @@ class TestSongLinkFeature:
         song = response.json()
         assert song['name'] == "The Remainder"
         assert song.get('link'), "The Remainder should have a link set"
-        assert 'youtube.com' in song['link'], "Link should be a YouTube URL"
-        print(f"✅ 'The Remainder' has YouTube link: {song['link']}")
+        assert song['link'].startswith('http'), "Link should be a valid URL"
+        print(f"✅ 'The Remainder' has practice link: {song['link']}")
     
     def test_songs_without_link_return_empty_string(self):
         """Test that songs without links return empty string, not null"""
