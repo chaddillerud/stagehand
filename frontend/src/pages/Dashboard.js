@@ -87,13 +87,13 @@ export default function Dashboard() {
     }
   };
 
-  const deleteSetList = async (id) => {
-    if (!window.confirm("Delete this set list?")) return;
+  const deleteSetList = async (id, name) => {
+    if (!window.confirm(`Delete "${name}"?`)) return;
 
     try {
       await axios.delete(`${API}/setlists/${id}`);
       setSetlists(setlists.filter(s => s.id !== id));
-      toast.success("Set list deleted");
+      toast.success(`"${name}" deleted`);
     } catch (error) {
       console.error("Error deleting set list:", error);
       toast.error("Failed to delete set list");
