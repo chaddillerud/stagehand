@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { toast } from "sonner";
 import { 
   Play, 
   Pause, 
@@ -17,7 +18,10 @@ import {
   Smartphone,
   Music,
   Volume2,
-  VolumeX
+  VolumeX,
+  Edit3,
+  Save,
+  XCircle
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
