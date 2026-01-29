@@ -990,6 +990,9 @@ export default function Teleprompter() {
                   <div className="flex items-center gap-2">
                     <GripVertical size={12} strokeWidth={1.5} />
                     <span>{index + 1}. {song.name}</span>
+                    {song.audio_file && practiceMode && (
+                      <Music size={12} className={index === currentIndex ? 'text-black' : 'text-green-500'} />
+                    )}
                   </div>
                 </button>
               ))}
