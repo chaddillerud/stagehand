@@ -259,75 +259,14 @@ export default function Dashboard() {
 
       if (!confirmed) return;
 
-      // Map old song IDs to new song IDs
-      const songIdMap = {};
-      console.log("=== STARTING RESTORE ===");
-      console.log(`Songs to import: ${backup.songs.length}`);
-      console.log(`Setlists to import: ${backup.setlists.length}`);
-
-      // Import songs and track ID mapping
-      let importedSongs = 0;
-      for (const song of backup.songs) {
-        try {
-          const oldId = song.id;
-          const response = await axios.post(`${API}/songs`, {
-            name: song.name,
-            artist: song.artist,
-            key: song.key,
-            tempo: song.tempo,
-            duration: song.duration,
-            notes: song.notes,
-            lyrics: song.lyrics,
-            scroll_speed: song.scroll_speed || 1.0,
-            auto_scroll: song.auto_scroll ?? true
-          });
-          const newId = response.data.id;
-          songIdMap[oldId] = newId;
-          console.log(`Song "${song.name}": ${oldId} -> ${newId}`);
-          importedSongs++;
-        } catch (error) {
-          console.error(`Error importing song ${song.name}:`, error);
-        }
-      }
-
-      console.log("=== SONG ID MAP ===");
-      console.log(JSON.stringify(songIdMap, null, 2));
-
-      // Import setlists with mapped song IDs
-      let importedSetlists = 0;
-      for (const setlist of backup.setlists) {
-        try {
-          const oldSongIds = setlist.song_ids || [];
-          console.log(`\n=== Setlist "${setlist.name}" ===`);
-          console.log(`Original song_ids (${oldSongIds.length}):`, oldSongIds);
-          
-          const newSongIds = [];
-          for (const oldId of oldSongIds) {
-            const newId = songIdMap[oldId];
-            console.log(`  ${oldId} -> ${newId || "NOT FOUND"}`);
-            if (newId) {
-              newSongIds.push(newId);
-            }
-          }
-
-          console.log(`Mapped song_ids (${newSongIds.length}):`, newSongIds);
-
-          const response = await axios.post(`${API}/setlists`, {
-            name: setlist.name,
-            song_ids: newSongIds
-          });
-          console.log(`Created setlist with ID: ${response.data.id}`);
-          importedSetlists++;
-        } catch (error) {
-          console.error(`Error importing setlist ${setlist.name}:`, error);
-        }
-      }
-
+      // Use backend restore endpoint for reliable ID mapping
+      const response = await axios.post(`${API}/restore`, backup);
+      
       await loadData();
       setRestoreFile(null);
       setShowRestoreModal(false);
 
-      toast.success(`Restored ${importedSongs} songs and ${importedSetlists} setlists!`);
+      toast.success(response.data.message);
     } catch (error) {
       console.error("Error restoring backup:", error);
       toast.error("Failed to restore backup. Check file format.");
