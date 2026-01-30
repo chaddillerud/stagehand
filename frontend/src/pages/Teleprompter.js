@@ -1608,26 +1608,26 @@ export default function Teleprompter() {
               data-testid="teleprompter-prev"
               onClick={previous}
               disabled={currentIndex === 0}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center justify-center gap-2"
+              className="rounded-lg md:rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-4 md:px-6 py-3 md:py-3 flex items-center justify-center gap-1 md:gap-2 min-w-[60px] md:min-w-0"
             >
-              <ChevronLeft size={20} strokeWidth={1.5} />
-              {orientation === 'landscape' && 'Prev'}
+              <ChevronLeft size={24} className="md:w-5 md:h-5" strokeWidth={1.5} />
+              <span className="hidden md:inline">Prev</span>
             </button>
 
             <button
               data-testid="teleprompter-play-pause"
               onClick={togglePlayPause}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-8 py-3 flex items-center justify-center gap-2"
+              className="rounded-lg md:rounded-none font-oswald uppercase tracking-wider font-bold bg-amber-400 text-black hover:bg-amber-500 transition-all active:scale-95 border-2 border-transparent px-6 md:px-8 py-4 md:py-3 flex items-center justify-center gap-2 min-w-[100px] md:min-w-0"
             >
               {isPlaying ? (
                 <>
-                  <Pause size={20} strokeWidth={2.5} />
-                  Pause
+                  <Pause size={24} className="md:w-5 md:h-5" strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Pause</span>
                 </>
               ) : (
                 <>
-                  <Play size={20} strokeWidth={2.5} />
-                  Play
+                  <Play size={24} className="md:w-5 md:h-5" strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Play</span>
                 </>
               )}
             </button>
@@ -1636,16 +1636,16 @@ export default function Teleprompter() {
               data-testid="teleprompter-next"
               onClick={next}
               disabled={currentIndex === songs.length - 1}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-6 py-3 flex items-center justify-center gap-2"
+              className="rounded-lg md:rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-zinc-700 px-4 md:px-6 py-3 md:py-3 flex items-center justify-center gap-1 md:gap-2 min-w-[60px] md:min-w-0"
             >
-              {orientation === 'landscape' && 'Next'}
-              <ChevronRight size={20} strokeWidth={1.5} />
+              <span className="hidden md:inline">Next</span>
+              <ChevronRight size={24} className="md:w-5 md:h-5" strokeWidth={1.5} />
             </button>
 
             <button
               data-testid="teleprompter-stop"
               onClick={stop}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center justify-center gap-2"
+              className="hidden md:flex rounded-none font-oswald uppercase tracking-wider font-bold bg-red-600 text-white hover:bg-red-700 transition-all active:scale-95 border-2 border-transparent px-6 py-3 items-center justify-center gap-2"
             >
               <Square size={20} strokeWidth={2.5} />
               Stop
