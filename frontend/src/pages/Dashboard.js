@@ -334,6 +334,43 @@ export default function Dashboard() {
     }
   };
 
+  const clearAllData = async () => {
+    const firstConfirm = window.confirm(
+      "⚠️ WARNING: This will DELETE ALL songs and setlists!\n\nThis action cannot be undone.\n\nAre you sure?"
+    );
+    if (!firstConfirm) return;
+
+    const secondConfirm = window.confirm(
+      "FINAL WARNING: Type 'DELETE' in the next prompt to confirm.\n\nClick OK to continue."
+    );
+    if (!secondConfirm) return;
+
+    const typed = window.prompt("Type DELETE to confirm:");
+    if (typed !== "DELETE") {
+      toast.error("Cancelled - you must type DELETE exactly");
+      return;
+    }
+
+    try {
+      // Delete all songs
+      for (const song of songs) {
+        await axios.delete(`${API}/songs/${song.id}`);
+      }
+      // Delete all setlists
+      for (const setlist of setlists) {
+        await axios.delete(`${API}/setlists/${setlist.id}`);
+      }
+      
+      setSongs([]);
+      setSetlists([]);
+      toast.success("All data cleared");
+    } catch (error) {
+      console.error("Error clearing data:", error);
+      toast.error("Failed to clear all data");
+      await loadData(); // Reload to show current state
+    }
+  };
+
   const calculateTotalTime = (songIds) => {
     let totalSeconds = 0;
     songIds.forEach(songId => {
