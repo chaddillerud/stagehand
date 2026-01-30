@@ -580,8 +580,8 @@ export default function Dashboard() {
       {/* New Set List Modal */}
       {showNewSetListModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-zinc-900 border-2 border-yellow-400 rounded-none p-8 max-w-md w-full">
-            <h3 className="text-2xl font-oswald font-bold uppercase mb-6 text-yellow-400">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-lg w-full max-h-[80vh] flex flex-col">
+            <h3 className="text-2xl font-oswald font-bold uppercase mb-4 text-amber-400">
               Create Set List
             </h3>
             <input
@@ -591,24 +591,79 @@ export default function Dashboard() {
               value={newSetListName}
               onChange={(e) => setNewSetListName(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && createSetList()}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-none px-4 py-3 text-white placeholder:text-zinc-600 font-mono focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400 outline-none mb-6"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 outline-none mb-4"
               autoFocus
             />
-            <div className="flex gap-4">
+            
+            {/* Song Selection */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-zinc-400">
+                  Select songs ({selectedSongIds.length} selected)
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={selectAllSongs}
+                    className="text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-zinc-600">|</span>
+                  <button
+                    onClick={deselectAllSongs}
+                    className="text-xs text-zinc-400 hover:text-white"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              
+              <div className="border border-zinc-800 rounded-lg max-h-60 overflow-y-auto bg-zinc-950/50">
+                {songs.length === 0 ? (
+                  <p className="text-zinc-500 text-sm p-4 text-center">No songs yet</p>
+                ) : (
+                  songs.map((song) => (
+                    <label
+                      key={song.id}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800/50 cursor-pointer border-b border-zinc-800/50 last:border-0"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedSongIds.includes(song.id)}
+                        onChange={() => toggleSongSelection(song.id)}
+                        className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-white text-sm truncate">{song.name}</div>
+                        {song.artist && (
+                          <div className="text-zinc-500 text-xs truncate">{song.artist}</div>
+                        )}
+                      </div>
+                      {song.duration && (
+                        <span className="text-zinc-600 text-xs font-mono">{song.duration}</span>
+                      )}
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-auto">
               <button
                 data-testid="create-setlist-confirm"
                 onClick={createSetList}
-                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-yellow-400 text-black hover:bg-yellow-500 transition-all active:scale-95 border-2 border-transparent px-6 py-3"
+                className="flex-1 btn-primary rounded-lg py-3 font-oswald uppercase tracking-wider"
               >
-                Create
+                Create {selectedSongIds.length > 0 && `(${selectedSongIds.length} songs)`}
               </button>
               <button
                 data-testid="create-setlist-cancel"
                 onClick={() => {
                   setShowNewSetListModal(false);
                   setNewSetListName("");
+                  setSelectedSongIds([]);
                 }}
-                className="flex-1 rounded-none font-oswald uppercase tracking-wider font-bold bg-zinc-800 text-white hover:bg-zinc-700 border-2 border-zinc-700 px-6 py-3"
+                className="flex-1 btn-secondary rounded-lg py-3 font-oswald uppercase tracking-wider"
               >
                 Cancel
               </button>
