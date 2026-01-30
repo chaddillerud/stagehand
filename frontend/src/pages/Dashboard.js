@@ -76,16 +76,33 @@ export default function Dashboard() {
     try {
       const response = await axios.post(`${API}/setlists`, {
         name: newSetListName,
-        song_ids: []
+        song_ids: selectedSongIds
       });
       setSetlists([...setlists, response.data]);
       setNewSetListName("");
+      setSelectedSongIds([]);
       setShowNewSetListModal(false);
-      toast.success("Set list created!");
+      toast.success(`Set list created with ${selectedSongIds.length} songs!`);
     } catch (error) {
       console.error("Error creating set list:", error);
       toast.error("Failed to create set list");
     }
+  };
+
+  const toggleSongSelection = (songId) => {
+    setSelectedSongIds(prev => 
+      prev.includes(songId) 
+        ? prev.filter(id => id !== songId)
+        : [...prev, songId]
+    );
+  };
+
+  const selectAllSongs = () => {
+    setSelectedSongIds(songs.map(s => s.id));
+  };
+
+  const deselectAllSongs = () => {
+    setSelectedSongIds([]);
   };
 
   const deleteSetList = async (id, name) => {
