@@ -1585,13 +1585,20 @@ export default function Teleprompter() {
             </div>
           )}
 
-          {/* Main Controls */}
-          <div className={`${orientStyles.mainControls} items-center justify-center`}>
+          {/* Mobile Song Counter */}
+          <div className="sm:hidden text-center mb-2">
+            <span className="text-xs font-oswald uppercase text-zinc-500">
+              Song {currentIndex + 1} of {songs.length}
+            </span>
+          </div>
+
+          {/* Main Controls - Mobile optimized with larger touch targets */}
+          <div className="flex items-center justify-center gap-2 md:gap-4">
             <button
               data-testid="teleprompter-start"
               onClick={start}
               disabled={isPlaying && currentIndex === 0}
-              className="rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-transparent px-6 py-3 flex items-center justify-center gap-2"
+              className="hidden md:flex rounded-none font-oswald uppercase tracking-wider font-bold bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 border-2 border-transparent px-6 py-3 items-center justify-center gap-2"
             >
               <Play size={20} strokeWidth={2.5} />
               Start
