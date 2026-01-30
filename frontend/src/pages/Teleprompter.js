@@ -1500,14 +1500,14 @@ export default function Teleprompter() {
 
       {/* Controls - Fixed Bottom */}
       <div 
-        className={`${styles.controlsBg} backdrop-blur-sm border-t border-zinc-800 p-4 transition-all duration-300 ${
+        className={`${styles.controlsBg} backdrop-blur-sm border-t border-zinc-800 p-2 md:p-4 transition-all duration-300 ${
           showControls ? 'translate-y-0' : 'translate-y-full'
         }`}
         data-testid="teleprompter-controls"
       >
         <div className="max-w-4xl mx-auto">
-          {/* Song Navigation */}
-          <div className="mb-4">
+          {/* Song Navigation - Hidden on mobile when more than 4 songs */}
+          <div className="mb-2 md:mb-4 hidden sm:block">
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500 mb-2 text-center">
               Song Order (Drag to Reorder)
             </div>
