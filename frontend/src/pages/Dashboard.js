@@ -259,36 +259,44 @@ export default function Dashboard() {
 
       if (!confirmed) return;
 
-      // Import songs
+      // Map old song IDs to new song IDs
+      const songIdMap = {};
+
+      // Import songs and track ID mapping
       let importedSongs = 0;
       for (const song of backup.songs) {
         try {
-          await axios.post(`${API}/songs`, {
+          const response = await axios.post(`${API}/songs`, {
             name: song.name,
             artist: song.artist,
             key: song.key,
             tempo: song.tempo,
             duration: song.duration,
             notes: song.notes,
-            lyrics: song.lyrics
+            lyrics: song.lyrics,
+            scroll_speed: song.scroll_speed || 1.0,
+            auto_scroll: song.auto_scroll ?? true
           });
+          // Map old ID to new ID
+          songIdMap[song.id] = response.data.id;
           importedSongs++;
         } catch (error) {
           console.error(`Error importing song ${song.name}:`, error);
         }
       }
 
-      // Reload data
-      await loadData();
-
-      // Import setlists (need to map old song IDs to new ones)
+      // Import setlists with mapped song IDs
       let importedSetlists = 0;
       for (const setlist of backup.setlists) {
         try {
-          // For now, create empty setlists (song ID mapping would be complex)
+          // Map old song IDs to new ones
+          const newSongIds = (setlist.song_ids || [])
+            .map(oldId => songIdMap[oldId])
+            .filter(id => id); // Remove any unmapped IDs
+
           await axios.post(`${API}/setlists`, {
-            name: `${setlist.name} (Restored)`,
-            song_ids: []
+            name: setlist.name,
+            song_ids: newSongIds
           });
           importedSetlists++;
         } catch (error) {
@@ -300,7 +308,7 @@ export default function Dashboard() {
       setRestoreFile(null);
       setShowRestoreModal(false);
 
-      toast.success(`Restored! ${importedSongs} songs, ${importedSetlists} setlists. Note: Setlists are empty - you'll need to add songs manually.`);
+      toast.success(`Restored ${importedSongs} songs and ${importedSetlists} setlists!`);
     } catch (error) {
       console.error("Error restoring backup:", error);
       toast.error("Failed to restore backup. Check file format.");
