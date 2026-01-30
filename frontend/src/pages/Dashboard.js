@@ -290,9 +290,18 @@ export default function Dashboard() {
       for (const setlist of backup.setlists) {
         try {
           // Map old song IDs to new ones
-          const newSongIds = (setlist.song_ids || [])
-            .map(oldId => songIdMap[oldId])
+          const oldSongIds = setlist.song_ids || [];
+          console.log(`Setlist "${setlist.name}" has ${oldSongIds.length} songs:`, oldSongIds);
+          
+          const newSongIds = oldSongIds
+            .map(oldId => {
+              const newId = songIdMap[oldId];
+              console.log(`  Mapping ${oldId} -> ${newId}`);
+              return newId;
+            })
             .filter(id => id); // Remove any unmapped IDs
+
+          console.log(`  Final mapped IDs (${newSongIds.length}):`, newSongIds);
 
           await axios.post(`${API}/setlists`, {
             name: setlist.name,
