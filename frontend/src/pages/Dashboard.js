@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [audioFile, setAudioFile] = useState(null);
   const [isCreatingFromAudio, setIsCreatingFromAudio] = useState(false);
   const [newSetListName, setNewSetListName] = useState("");
+  const [selectedSongIds, setSelectedSongIds] = useState([]);
   const [importFile, setImportFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
