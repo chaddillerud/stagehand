@@ -683,6 +683,92 @@ async def delete_setlist(setlist_id: str):
     return {"message": "SetList deleted successfully"}
 
 
+# Backup/Restore endpoints
+class BackupData(BaseModel):
+    version: str
+    songs: List[dict]
+    setlists: List[dict]
+
+@api_router.post("/restore")
+async def restore_backup(backup: BackupData):
+    """Restore songs and setlists from backup, mapping old IDs to new IDs"""
+    
+    song_id_map = {}  # old_id -> new_id
+    imported_songs = 0
+    imported_setlists = 0
+    
+    # Import songs and build ID mapping
+    for song_data in backup.songs:
+        old_id = song_data.get('id')
+        
+        # Create new song with new ID
+        new_song = Song(
+            name=song_data.get('name', 'Untitled'),
+            artist=song_data.get('artist', ''),
+            key=song_data.get('key', ''),
+            tempo=song_data.get('tempo', ''),
+            duration=song_data.get('duration', ''),
+            notes=song_data.get('notes', ''),
+            lyrics=song_data.get('lyrics', ''),
+            scroll_speed=song_data.get('scroll_speed', 1.0),
+            auto_scroll=song_data.get('auto_scroll', True)
+        )
+        
+        doc = new_song.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        
+        await db.songs.insert_one(doc)
+        
+        # Map old ID to new ID
+        if old_id:
+            song_id_map[old_id] = new_song.id
+        
+        imported_songs += 1
+    
+    # Import setlists with mapped song IDs
+    for setlist_data in backup.setlists:
+        old_song_ids = setlist_data.get('song_ids', [])
+        
+        # Map old song IDs to new ones
+        new_song_ids = []
+        for old_id in old_song_ids:
+            new_id = song_id_map.get(old_id)
+            if new_id:
+                new_song_ids.append(new_id)
+        
+        new_setlist = SetList(
+            name=setlist_data.get('name', 'Untitled'),
+            song_ids=new_song_ids
+        )
+        
+        doc = new_setlist.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        
+        await db.setlists.insert_one(doc)
+        imported_setlists += 1
+    
+    return {
+        "message": f"Restored {imported_songs} songs and {imported_setlists} setlists",
+        "songs_imported": imported_songs,
+        "setlists_imported": imported_setlists,
+        "song_id_mappings": len(song_id_map)
+    }
+
+@api_router.delete("/clear-all")
+async def clear_all_data():
+    """Delete all songs and setlists"""
+    songs_result = await db.songs.delete_many({})
+    setlists_result = await db.setlists.delete_many({})
+    
+    return {
+        "message": "All data cleared",
+        "songs_deleted": songs_result.deleted_count,
+        "setlists_deleted": setlists_result.deleted_count
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
