@@ -939,37 +939,42 @@ export default function Teleprompter() {
     >
       {/* Header - Fixed */}
       <div 
-        className={`${styles.headerBg} backdrop-blur-sm border-b border-zinc-800 p-4 transition-all duration-300 ${
+        className={`${styles.headerBg} backdrop-blur-sm border-b border-zinc-800 p-2 md:p-4 transition-all duration-300 ${
           showControls ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
-        <div className={`flex items-center ${orientStyles.header}`}>
-          <div>
+        {/* Mobile: Compact 2-row layout, Desktop: Full layout */}
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          {/* Left: Setlist name (hidden on small mobile) */}
+          <div className="hidden sm:block min-w-0">
             <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Set List
             </div>
-            <div className={`text-xl font-oswald font-bold uppercase ${styles.accent}`}>
+            <div className={`text-lg md:text-xl font-oswald font-bold uppercase ${styles.accent} truncate`}>
               {setlist.name}
             </div>
           </div>
           
-          <div className="text-center">
-            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
+          {/* Center: Current Time - prominent on all screens */}
+          <div className="text-center flex-shrink-0">
+            <div className="hidden md:block text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Current Time
             </div>
-            <div className={`text-3xl font-mono font-bold ${styles.text}`} data-testid="current-time">
+            <div className={`text-xl md:text-3xl font-mono font-bold ${styles.text}`} data-testid="current-time">
               {formatCurrentTime()}
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-xs font-oswald uppercase tracking-wider text-zinc-500">
+          {/* Right: Performance time - compact on mobile */}
+          <div className="text-right flex-shrink-0">
+            <div className="hidden md:block text-xs font-oswald uppercase tracking-wider text-zinc-500">
               Performance Time
             </div>
-            <div className={`text-2xl font-mono font-bold ${styles.accent}`}>
-              [{formatTime(elapsedTime)}] / [{formatTime(totalTime)}]
+            <div className={`text-sm md:text-2xl font-mono font-bold ${styles.accent}`}>
+              <span className="hidden md:inline">[</span>{formatTime(elapsedTime)}<span className="hidden md:inline">] / [{formatTime(totalTime)}]</span>
+              <span className="md:hidden">/{formatTime(totalTime)}</span>
             </div>
-            <div className={`text-sm font-mono ${styles.secondaryText} mt-1`}>
+            <div className={`hidden md:block text-sm font-mono ${styles.secondaryText} mt-1`}>
               Est. End: {calculateEndTime()}
             </div>
           </div>
@@ -977,17 +982,17 @@ export default function Teleprompter() {
           <button
             data-testid="settings-toggle"
             onClick={() => setShowSettings(!showSettings)}
-            className="text-zinc-500 hover:text-yellow-400 transition-colors"
+            className="text-zinc-500 hover:text-yellow-400 transition-colors p-1"
           >
-            <Settings size={24} strokeWidth={1.5} />
+            <Settings size={20} className="md:w-6 md:h-6" strokeWidth={1.5} />
           </button>
         </div>
 
         {/* Quick Controls Bar - Scroll Speed & Practice Mode */}
-        <div className={`flex items-center gap-6 mt-3 pt-3 border-t border-zinc-800 ${showControls ? '' : 'hidden'}`}>
+        <div className={`flex items-center gap-3 md:gap-6 mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-800 ${showControls ? '' : 'hidden'}`}>
           {/* Scroll Speed */}
-          <div className="flex items-center gap-3 flex-1">
-            <span className="text-xs font-oswald uppercase tracking-wider text-zinc-500 whitespace-nowrap">
+          <div className="flex items-center gap-2 md:gap-3 flex-1">
+            <span className="text-xs font-oswald uppercase tracking-wider text-zinc-500 whitespace-nowrap hidden sm:inline">
               Scroll
             </span>
             <input
@@ -997,7 +1002,7 @@ export default function Teleprompter() {
               step="0.1"
               value={scrollSpeed}
               onChange={(e) => handleScrollSpeedChange(parseFloat(e.target.value))}
-              className="flex-1 accent-yellow-400 h-2"
+              className="flex-1 accent-yellow-400 h-2 min-w-16"
               data-testid="scroll-speed-slider-main"
             />
             <span className="text-sm font-mono font-bold text-yellow-400 w-14 text-right">
