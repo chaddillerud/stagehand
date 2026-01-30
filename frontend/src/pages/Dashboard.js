@@ -340,11 +340,6 @@ export default function Dashboard() {
     );
     if (!firstConfirm) return;
 
-    const secondConfirm = window.confirm(
-      "FINAL WARNING: Type 'DELETE' in the next prompt to confirm.\n\nClick OK to continue."
-    );
-    if (!secondConfirm) return;
-
     const typed = window.prompt("Type DELETE to confirm:");
     if (typed !== "DELETE") {
       toast.error("Cancelled - you must type DELETE exactly");
@@ -352,22 +347,14 @@ export default function Dashboard() {
     }
 
     try {
-      // Delete all songs
-      for (const song of songs) {
-        await axios.delete(`${API}/songs/${song.id}`);
-      }
-      // Delete all setlists
-      for (const setlist of setlists) {
-        await axios.delete(`${API}/setlists/${setlist.id}`);
-      }
-      
+      const response = await axios.delete(`${API}/clear-all`);
       setSongs([]);
       setSetlists([]);
-      toast.success("All data cleared");
+      toast.success(`Cleared ${response.data.songs_deleted} songs and ${response.data.setlists_deleted} setlists`);
     } catch (error) {
       console.error("Error clearing data:", error);
       toast.error("Failed to clear all data");
-      await loadData(); // Reload to show current state
+      await loadData();
     }
   };
 
