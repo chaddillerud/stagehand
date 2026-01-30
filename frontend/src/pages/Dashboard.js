@@ -438,6 +438,14 @@ export default function Dashboard() {
               >
                 <Upload size={20} strokeWidth={1.5} />
               </button>
+              <button
+                data-testid="clear-all-data-btn"
+                onClick={clearAllData}
+                title="Clear all data"
+                className="text-zinc-500 hover:text-red-500 transition-colors p-2"
+              >
+                <Trash2 size={20} strokeWidth={1.5} />
+              </button>
             </div>
           </div>
         </div>
