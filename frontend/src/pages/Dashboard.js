@@ -261,11 +261,15 @@ export default function Dashboard() {
 
       // Map old song IDs to new song IDs
       const songIdMap = {};
+      console.log("=== STARTING RESTORE ===");
+      console.log(`Songs to import: ${backup.songs.length}`);
+      console.log(`Setlists to import: ${backup.setlists.length}`);
 
       // Import songs and track ID mapping
       let importedSongs = 0;
       for (const song of backup.songs) {
         try {
+          const oldId = song.id;
           const response = await axios.post(`${API}/songs`, {
             name: song.name,
             artist: song.artist,
@@ -277,36 +281,42 @@ export default function Dashboard() {
             scroll_speed: song.scroll_speed || 1.0,
             auto_scroll: song.auto_scroll ?? true
           });
-          // Map old ID to new ID
-          songIdMap[song.id] = response.data.id;
+          const newId = response.data.id;
+          songIdMap[oldId] = newId;
+          console.log(`Song "${song.name}": ${oldId} -> ${newId}`);
           importedSongs++;
         } catch (error) {
           console.error(`Error importing song ${song.name}:`, error);
         }
       }
 
+      console.log("=== SONG ID MAP ===");
+      console.log(JSON.stringify(songIdMap, null, 2));
+
       // Import setlists with mapped song IDs
       let importedSetlists = 0;
       for (const setlist of backup.setlists) {
         try {
-          // Map old song IDs to new ones
           const oldSongIds = setlist.song_ids || [];
-          console.log(`Setlist "${setlist.name}" has ${oldSongIds.length} songs:`, oldSongIds);
+          console.log(`\n=== Setlist "${setlist.name}" ===`);
+          console.log(`Original song_ids (${oldSongIds.length}):`, oldSongIds);
           
-          const newSongIds = oldSongIds
-            .map(oldId => {
-              const newId = songIdMap[oldId];
-              console.log(`  Mapping ${oldId} -> ${newId}`);
-              return newId;
-            })
-            .filter(id => id); // Remove any unmapped IDs
+          const newSongIds = [];
+          for (const oldId of oldSongIds) {
+            const newId = songIdMap[oldId];
+            console.log(`  ${oldId} -> ${newId || "NOT FOUND"}`);
+            if (newId) {
+              newSongIds.push(newId);
+            }
+          }
 
-          console.log(`  Final mapped IDs (${newSongIds.length}):`, newSongIds);
+          console.log(`Mapped song_ids (${newSongIds.length}):`, newSongIds);
 
-          await axios.post(`${API}/setlists`, {
+          const response = await axios.post(`${API}/setlists`, {
             name: setlist.name,
             song_ids: newSongIds
           });
+          console.log(`Created setlist with ID: ${response.data.id}`);
           importedSetlists++;
         } catch (error) {
           console.error(`Error importing setlist ${setlist.name}:`, error);
