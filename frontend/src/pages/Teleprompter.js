@@ -47,6 +47,8 @@ export default function Teleprompter() {
   const [practiceMode, setPracticeMode] = useState(false); // Practice mode with audio playback
   const [audioMuted, setAudioMuted] = useState(false);
   const [clickTrackEnabled, setClickTrackEnabled] = useState(false); // Click track / metronome
+  const [clickSoundMuted, setClickSoundMuted] = useState(false); // Mute sound but keep visual pulse
+  const [clickSound, setClickSound] = useState('click'); // Sound type: click, woodblock, cowbell, tambo
   const [countIn, setCountIn] = useState('none'); // none, 4, 8 beats
   const [isCountingIn, setIsCountingIn] = useState(false);
   const [countInBeats, setCountInBeats] = useState(0);
