@@ -929,14 +929,40 @@ export default function Teleprompter() {
   }
 
   const currentSong = songs[currentIndex];
+  
+  // Calculate pulse animation duration based on BPM
+  const bpm = parseInt(currentSong?.tempo) || 120;
+  const pulseDuration = 60 / bpm; // seconds per beat
 
   return (
     <div 
-      className={`h-screen w-full ${styles.bg} ${styles.text} overflow-hidden flex flex-col`}
+      className={`h-screen w-full ${styles.bg} ${styles.text} overflow-hidden flex flex-col relative`}
       onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Pulsating BPM Ring - only when click track is on and playing */}
+      {clickTrackEnabled && isPlaying && currentSong?.tempo && (
+        <div 
+          className="absolute inset-0 pointer-events-none z-50"
+          style={{
+            boxShadow: 'inset 0 0 30px 8px rgba(239, 68, 68, 0.7)',
+            animation: `bpmPulse ${pulseDuration}s ease-in-out infinite`,
+          }}
+        />
+      )}
+      
+      <style>{`
+        @keyframes bpmPulse {
+          0%, 100% {
+            box-shadow: inset 0 0 20px 4px rgba(239, 68, 68, 0.3);
+          }
+          50% {
+            box-shadow: inset 0 0 40px 12px rgba(239, 68, 68, 0.8);
+          }
+        }
+      `}</style>
+
       {/* Header - Fixed */}
       <div 
         className={`${styles.headerBg} backdrop-blur-sm border-b border-zinc-800 p-2 md:p-4 transition-all duration-300 ${
