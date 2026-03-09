@@ -11,15 +11,16 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install emergentintegrations from custom index, then other deps
-RUN pip install --no-cache-dir emergentintegrations --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ \
-    && pip install --no-cache-dir -r requirements.txt
+# Install dependencies (skip emergentintegrations - only available on Emergent platform)
+RUN pip install --no-cache-dir -r requirements.txt || \
+    (grep -v emergentintegrations requirements.txt > requirements_filtered.txt && \
+     pip install --no-cache-dir -r requirements_filtered.txt)
 
 # Copy application code
 COPY . .
 
 # Create uploads directory
-RUN mkdir -p /app/uploads
+RUN mkdir -p /app/audio_files
 
 # Expose port
 EXPOSE 8001
