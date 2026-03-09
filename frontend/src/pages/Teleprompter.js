@@ -782,7 +782,7 @@ export default function Teleprompter() {
     setAutoScrollEnabled(newValue);
     const currentSong = songs[currentIndex];
     if (currentSong) {
-      saveScrollSettings(currentSong.id, scrollSpeed, newValue);
+      saveScrollSettings(currentSong.id, scrollSpeed, newValue, fontSize);
     }
   };
 
