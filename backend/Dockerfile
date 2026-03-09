@@ -11,10 +11,8 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install dependencies (skip emergentintegrations - only available on Emergent platform)
-RUN pip install --no-cache-dir -r requirements.txt || \
-    (grep -v emergentintegrations requirements.txt > requirements_filtered.txt && \
-     pip install --no-cache-dir -r requirements_filtered.txt)
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
