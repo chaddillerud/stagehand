@@ -968,6 +968,11 @@ export default function Teleprompter() {
         />
       )}
       
+      {/* Debug: Show ring status */}
+      <div className="absolute top-2 left-2 z-50 bg-black/80 text-xs text-white p-2 rounded pointer-events-none">
+        Ring: {clickTrackEnabled ? '✓Click' : '✗Click'} {isPlaying ? '✓Play' : '✗Play'} {currentSong?.tempo ? `✓BPM:${currentSong.tempo}` : '✗BPM'}
+      </div>
+      
       <style>{`
         @keyframes bpmPulse {
           0%, 100% {
