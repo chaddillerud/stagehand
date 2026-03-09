@@ -389,6 +389,9 @@ export default function Teleprompter() {
 
   // Play a metronome click sound
   const playClick = (isAccent = false) => {
+    // Skip sound if muted (visual pulse still works)
+    if (clickSoundMuted) return;
+    
     const ctx = initAudioContext();
     if (ctx.state === 'suspended') {
       ctx.resume();
@@ -400,15 +403,59 @@ export default function Teleprompter() {
     oscillator.connect(gainNode);
     gainNode.connect(ctx.destination);
     
-    // Classic metronome: higher pitch for accent (beat 1), lower for others
-    oscillator.frequency.value = isAccent ? 1000 : 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-    
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + 0.1);
+    // Different sounds based on selection
+    switch (clickSound) {
+      case 'woodblock':
+        // Wood block: short, sharp, high-pitched
+        oscillator.frequency.value = isAccent ? 900 : 700;
+        oscillator.type = 'triangle';
+        gainNode.gain.setValueAtTime(0.6, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.05);
+        break;
+        
+      case 'cowbell':
+        // Cowbell: metallic, longer decay
+        oscillator.frequency.value = isAccent ? 560 : 500;
+        oscillator.type = 'square';
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.15);
+        break;
+        
+      case 'tambo':
+        // Tambourine: noise-like, shimmery
+        oscillator.frequency.value = isAccent ? 5000 : 4000;
+        oscillator.type = 'sawtooth';
+        gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.08);
+        break;
+        
+      case 'hihat':
+        // Hi-hat: crisp, high frequency
+        oscillator.frequency.value = isAccent ? 8000 : 6000;
+        oscillator.type = 'sawtooth';
+        gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.05);
+        break;
+        
+      case 'click':
+      default:
+        // Classic metronome: higher pitch for accent (beat 1), lower for others
+        oscillator.frequency.value = isAccent ? 1000 : 800;
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+        oscillator.start(ctx.currentTime);
+        oscillator.stop(ctx.currentTime + 0.1);
+        break;
+    }
   };
 
   // Start click track metronome
