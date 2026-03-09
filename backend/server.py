@@ -13,7 +13,15 @@ from datetime import datetime, timezone
 import aiohttp
 import tempfile
 import shutil
-from emergentintegrations.llm.openai import OpenAISpeechToText
+
+# Try to import emergentintegrations (only available on Emergent platform)
+try:
+    from emergentintegrations.llm.openai import OpenAISpeechToText
+    TRANSCRIPTION_AVAILABLE = True
+except ImportError:
+    TRANSCRIPTION_AVAILABLE = False
+    OpenAISpeechToText = None
+
 from mutagen import File as AudioFile
 
 # Audio files storage directory
