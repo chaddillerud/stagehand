@@ -717,19 +717,29 @@ export default function Teleprompter() {
   };
 
   // Save scroll settings for current song (immediate save, no debounce)
-  const saveScrollSettings = async (songId, speed, autoScroll) => {
+  const saveScrollSettings = async (songId, speed, autoScroll, currentFontSize) => {
     if (!songId) return;
 
     try {
+      // Get current song's scroll_speeds or create default
+      const currentSong = songs.find(s => s.id === songId);
+      const currentScrollSpeeds = currentSong?.scroll_speeds || { small: 1.0, medium: 1.0, large: 1.0, xlarge: 1.0 };
+      
+      // Update the speed for current font size
+      const updatedScrollSpeeds = {
+        ...currentScrollSpeeds,
+        [currentFontSize]: speed
+      };
+
       await axios.put(`${API}/songs/${songId}`, {
-        scroll_speed: speed,
+        scroll_speeds: updatedScrollSpeeds,
         auto_scroll: autoScroll
       });
       
       // Update local state - find song by ID to handle index changes
       setSongs(prevSongs => prevSongs.map(s => 
         s.id === songId 
-          ? { ...s, scroll_speed: speed, auto_scroll: autoScroll }
+          ? { ...s, scroll_speeds: updatedScrollSpeeds, auto_scroll: autoScroll }
           : s
       ));
     } catch (error) {
@@ -739,24 +749,30 @@ export default function Teleprompter() {
 
   // Track which song's settings we've loaded to avoid reloading on every render
   const loadedSongIdRef = useRef(null);
+  const loadedFontSizeRef = useRef(null);
 
-  // Load song-specific scroll settings ONLY when switching to a different song
+  // Load song-specific scroll settings when switching songs OR font size
   useEffect(() => {
     const currentSong = songs[currentIndex];
-    if (currentSong && currentSong.id !== loadedSongIdRef.current) {
+    if (currentSong && (currentSong.id !== loadedSongIdRef.current || fontSize !== loadedFontSizeRef.current)) {
       loadedSongIdRef.current = currentSong.id;
-      // Load song-specific settings (with defaults)
-      setScrollSpeed(currentSong.scroll_speed ?? 1.0);
+      loadedFontSizeRef.current = fontSize;
+      
+      // Load song-specific settings for current font size
+      const scrollSpeeds = currentSong.scroll_speeds || { small: 1.0, medium: 1.0, large: 1.0, xlarge: 1.0 };
+      const speedForFontSize = scrollSpeeds[fontSize] ?? currentSong.scroll_speed ?? 1.0;
+      
+      setScrollSpeed(speedForFontSize);
       setAutoScrollEnabled(currentSong.auto_scroll ?? true);
     }
-  }, [currentIndex, songs]);
+  }, [currentIndex, songs, fontSize]);
 
   // Save scroll speed immediately when changed
   const handleScrollSpeedChange = (newSpeed) => {
     setScrollSpeed(newSpeed);
     const currentSong = songs[currentIndex];
     if (currentSong) {
-      saveScrollSettings(currentSong.id, newSpeed, autoScrollEnabled);
+      saveScrollSettings(currentSong.id, newSpeed, autoScrollEnabled, fontSize);
     }
   };
 
