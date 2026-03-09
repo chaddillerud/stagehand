@@ -1580,6 +1580,7 @@ export default function Teleprompter() {
                   )}
                 </div>
               </div>
+              </>
             )}
           </div>
 
